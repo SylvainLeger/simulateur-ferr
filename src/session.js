@@ -49,6 +49,7 @@ function sanitize(o) {
     // Un lien ou une sauvegarde ne peut pas imposer une valeur hors des bornes du formulaire
     out[k] = typeof v === 'number' ? clamp(k, v) : v;
   }
+  if (out.deathAge !== undefined && out.deathAge <= (out.age ?? DEFAULTS.age)) out.deathAge = Math.min(105, (out.age ?? DEFAULTS.age) + 1);
   return out;
 }
 const snapshot = () => sanitize(S);

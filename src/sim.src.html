@@ -238,7 +238,7 @@ details summary{cursor:pointer;font-weight:600}
 .cv-r .l{color:var(--muted)} .cv-r.big .l{color:var(--ink)}
 .gpos{color:var(--good)} .gneg{color:var(--warn)}
 .cv-lg i.dash{background:none;border-top:2px dashed var(--nr);height:0;width:16px;border-radius:0}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;text-align:center;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10;max-width:calc(100vw - 32px)}
+.toast{position:fixed;left:50%;width:max-content;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;text-align:center;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10;max-width:calc(100vw - 32px)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:860px){.wiz{grid-template-columns:1fr}.rail{position:static;grid-auto-flow:column;overflow-x:auto}.rail button span.t{display:none}.headline,.two{grid-template-columns:1fr}}
 @media (max-width:620px){.scitem,.resume{grid-template-columns:1fr}.scbtns{justify-content:flex-start}.cv-cols{grid-template-columns:1fr}.saved{display:none}}

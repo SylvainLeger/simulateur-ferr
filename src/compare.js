@@ -132,7 +132,7 @@ function cmpChart(ra, rb) {
   const a0 = Math.min(...all.map(p => p[0])), a1 = Math.max(...all.map(p => p[0]), a0 + 1);
   const top = Math.max(1, ...all.map(p => p[1])) * 1.08;
   const sx = a => pl + (a - a0) / (a1 - a0) * (W - pl - pr), sy = v => pt + (H - pt - pb) * (1 - v / top);
-  const kfmt = v => v >= 1e6 ? num(v / 1e6) + ' M' : Math.round(v / 1000) + ' k';
+  const kfmt = v => v >= 1e6 ? (S.lang === 'fr' ? `${num(v / 1e6)}\u00a0M$` : `$${num(v / 1e6)}M`) : kmoney(v);
   let g = '';
   const st = niceStep(top);
   for (let v = 0; v <= top; v += st) g += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${sy(v)}" y2="${sy(v)}"/><text x="${pl - 6}" y="${sy(v) + 4}" text-anchor="end">${kfmt(v)}</text>`;
@@ -155,7 +155,7 @@ function buildCmp() {
   const gap = (a, b, upGood) => {
     const d = b - a; if (Math.abs(d) < 1) return `<span class="v">${money(0)}</span>`;
     const good = (d > 0) === upGood;
-    return `<span class="v ${good ? 'gpos' : 'gneg'}">${d > 0 ? '+' : '−'} ${money(Math.abs(d))}</span>`;
+    return `<span class="v ${good ? 'gpos' : 'gneg'}">${d > 0 ? '+' : '−'}${money(Math.abs(d))}</span>`;
   };
   const diffs = diffList(da, db);
   const ages = [...new Set([...ra.years, ...rb.years].map(y => y.age))].sort((x, y) => x - y);

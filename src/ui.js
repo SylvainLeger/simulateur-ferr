@@ -63,7 +63,7 @@ const I18N = {
     ch_misc: 'Prime RAMQ et crédit d\'impôt pour soutien aux aînés', ch_spouse: 'Impôt et PSV récupérée du conjoint',
     ch_dent: 'Soins dentaires', ch_dentf: (inc, st) => `revenu familial ${inc} : ${st}`, dent_free: 'couverts à 100 %', dent_40: 'quote-part de 40 %', dent_60: 'quote-part de 60 %', dent_none: 'non admissible', dent_ins: 'assurance privée',
     ch_spend: 'Dépenses du ménage', ch_res_s: 'Surplus placé', ch_res_d: 'Puisé dans l\'épargne', ch_resf_s: (b, t) => `compte non enregistré ${b}${t}`, ch_tfsa: (t) => `, CELI ${t}`,
-    ch_mr: 'Taux marginal effectif sur 1 000 $ de plus', ch_mrf: 'impôts + PSV récupérée + effet sur les soins dentaires',
+    ch_mr: 'Taux marginal effectif sur 1 000 $ de plus', ch_mrf: 'impôts + PSV récupérée + SRG perdu + effet sur les soins dentaires',
     ch_end: 'Soldes en fin d\'année', ch_endf: (f, b, t) => `FERR ${f} · compte ${b}${t}`, hh: '(ménage)', nominal_tag: '(non indexé)',
     short: (x) => `Attention : les dépenses ne sont pas couvertes cette année (manque de ${x}).`,
     ch_death: 'Impôt au décès sur le solde du FERR et les gains latents',
@@ -148,7 +148,7 @@ const I18N = {
     ch_misc: 'RAMQ premium and senior assistance credit', ch_spouse: 'Spouse\'s tax and OAS recovery',
     ch_dent: 'Dental care', ch_dentf: (inc, st) => `family income ${inc}: ${st}`, dent_free: '100% covered', dent_40: '40% co-payment', dent_60: '60% co-payment', dent_none: 'not eligible', dent_ins: 'private insurance',
     ch_spend: 'Household spending', ch_res_s: 'Surplus invested', ch_res_d: 'Drawn from savings', ch_resf_s: (b, t) => `non-registered ${b}${t}`, ch_tfsa: (t) => `, TFSA ${t}`,
-    ch_mr: 'Effective marginal rate on $1,000 more', ch_mrf: 'taxes + OAS recovery + effect on dental care',
+    ch_mr: 'Effective marginal rate on $1,000 more', ch_mrf: 'taxes + OAS recovery + lost GIS + effect on dental care',
     ch_end: 'Year-end balances', hh: '(household)', nominal_tag: '(not indexed)', ch_endf: (f, b, t) => `RRIF ${f} · account ${b}${t}`,
     short: (x) => `Warning: spending is not covered this year (short by ${x}).`,
     ch_death: 'Tax at death on the RRIF balance and unrealized gains',
@@ -229,6 +229,7 @@ function bindFields(root, onChange) {
       const k = inp.dataset.k; let v = parseFloat(inp.value); if (isNaN(v)) return;
       v = clamp(k, v); S[k] = v;
       root.querySelectorAll(`input[data-k="${k}"]`).forEach(o => { if (o !== inp) o.value = v; });
+      if (k === 'deathAge' && S.deathAge <= S.age) S.deathAge = Math.min(105, S.age + 1);
       if (k === 'age' && S.deathAge <= S.age) { S.deathAge = S.age + 1; root.querySelectorAll('input[data-k="deathAge"]').forEach(o => o.value = S.deathAge); }
       save(); onChange && onChange(k);
     });
@@ -512,6 +513,7 @@ function renderCmp() {
     c.set && c.set(); S.strat = c.st; save(); animNext = true;
     $('#strats').querySelectorAll('[data-st]').forEach(o => o.setAttribute('aria-pressed', String(o.dataset.st === S.strat)));
     $('#stratCtl').dataset.for = ''; refresh();
+    const f = $(`#cmp [data-ck2="${c.key}"]`); if (f) f.focus({ preventScroll: true });
   });
 }
 
