@@ -8,7 +8,7 @@ Object.assign(I18N.fr, {
   sc_title: 'Mes scénarios', sc_none: 'Aucun scénario enregistré pour l\'instant. Utilisez « Enregistrer » dans les résultats pour garder la situation actuelle sous un nom, puis comparez-la avec une autre.',
   sc_foot: 'Les scénarios restent dans ce navigateur, sur cet appareil.', sc_act: 'ouvert', sc_mod: 'modifié',
   sc_open: 'Ouvrir', sc_cmp: 'Comparer', sc_more: 'Plus d\'actions', sc_ren: 'Renommer', sc_del: 'Supprimer', sc_delok: 'Confirmer la suppression', sc_ok: 'OK',
-  sc_loaded: (n) => `Scénario « ${n} » ouvert.`, sc_renamed: (n) => `Renommé en « ${n} ».`, sc_age: (a, d) => `${a} ans, jusqu'à ${d} ans`,
+  sc_loaded: (n) => `Scénario « ${n} » ouvert.`, sc_renamed: (n) => `Renommé en « ${n} ».`, sc_taken: (n) => `Un scénario s'appelle déjà « ${n} ». Choisissez un autre nom.`, sc_age: (a, d) => `${a} ans, jusqu'à ${d} ans`,
   sc_estate: (x) => `patrimoine au décès ${x}`, saved_at: (d) => `enregistré le ${d}`,
   link_title: 'Lien de partage', link_copied: 'Lien copié. Il contient vos chiffres : envoyez-le seulement à des personnes de confiance.',
   link_manual: 'Copiez ce lien (Ctrl+C), puis collez-le dans un courriel. Il contient vos chiffres : envoyez-le seulement à des personnes de confiance.',
@@ -23,7 +23,7 @@ Object.assign(I18N.en, {
   sc_title: 'My scenarios', sc_none: 'No saved scenarios yet. Use “Save” on the results to keep the current situation under a name, then compare it with another one.',
   sc_foot: 'Scenarios stay in this browser, on this device.', sc_act: 'open', sc_mod: 'modified',
   sc_open: 'Open', sc_cmp: 'Compare', sc_more: 'More actions', sc_ren: 'Rename', sc_del: 'Delete', sc_delok: 'Confirm deletion', sc_ok: 'OK',
-  sc_loaded: (n) => `Scenario “${n}” opened.`, sc_renamed: (n) => `Renamed to “${n}”.`, sc_age: (a, d) => `age ${a}, up to ${d}`,
+  sc_loaded: (n) => `Scenario “${n}” opened.`, sc_renamed: (n) => `Renamed to “${n}”.`, sc_taken: (n) => `A scenario is already called “${n}”. Choose another name.`, sc_age: (a, d) => `age ${a}, up to ${d}`,
   sc_estate: (x) => `estate at death ${x}`, saved_at: (d) => `saved ${d}`,
   link_title: 'Share link', link_copied: 'Link copied. It contains your numbers: only send it to people you trust.',
   link_manual: 'Copy this link (Ctrl+C), then paste it into an email. It contains your numbers: only send it to people you trust.',
@@ -217,7 +217,9 @@ function renderScen(dlg) {
     const inp = $('#renI'); inp.focus(); inp.select();
     $('#renF').onsubmit = e => {
       e.preventDefault(); const name = inp.value.trim(); if (!name || name === sc.name) { renderScen(dlg); return; }
-      const l = loadScen().filter(x => x.name !== name), j = l.findIndex(x => x.name === sc.name); if (j < 0) return;
+      const l = loadScen(), j = l.findIndex(x => x.name === sc.name); if (j < 0) return;
+      // Un nom déjà pris ne doit jamais écraser l'autre scénario
+      if (l.some(x => x.name === name)) { toast(tr('sc_taken', name)); inp.focus(); inp.select(); return; }
       l[j].name = name; storeScen(l); if (S.scen === sc.name) { S.scen = name; save(); } renameInCmp(sc.name, name); renderScen(dlg); onScenChange(); toast(tr('sc_renamed', name));
     };
   });
