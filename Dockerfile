@@ -8,5 +8,5 @@ RUN python build.py
 # Étape 2 : la servir avec nginx / Stage 2: serve it with nginx
 FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist/index.html /usr/share/nginx/html/index.html
+COPY --from=build /app/dist/index.html /app/dist/*.png /usr/share/nginx/html/
 EXPOSE 8080

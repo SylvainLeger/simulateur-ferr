@@ -11,11 +11,7 @@
   --display:"Source Serif 4", Georgia, serif; --body:"IBM Plex Sans", system-ui, sans-serif; --mono:"IBM Plex Mono", ui-monospace, monospace;
   --r:10px;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111715; --surface:#19211e; --sunk:#141b18; --ink:#e3eae6; --muted:#98a7a0; --line:#2d3934;
-  --accent:#5cc4a9; --accent-ink:#0d1a16; --accent-soft:#1c332d;
-  --ferr:#5cc4a9; --nr:#8ea8ec; --tfsa:#e2b75a; --tax:#ee8a60; --claw:#e07a86; --spend:#8c9a94;
-  --warn:#f0a07a; --warn-soft:#38251d; --good:#76c895; color-scheme:dark}}
+/* Mode clair par défaut : le sombre ne s'applique que si on le choisit (data-theme="dark") */
 :root[data-theme="dark"]{
   --bg:#111715; --surface:#19211e; --sunk:#141b18; --ink:#e3eae6; --muted:#98a7a0; --line:#2d3934;
   --accent:#5cc4a9; --accent-ink:#0d1a16; --accent-soft:#1c332d;
@@ -178,44 +174,97 @@ details summary{cursor:pointer;font-weight:600}
 .scrow{display:flex;gap:8px;flex-wrap:wrap}
 .scrow input{flex:1 1 220px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:8px 10px;font:inherit}
 .scrow input[readonly]{font:400 .8rem var(--mono);color:var(--muted)}
-.scform{display:grid;gap:6px}
+.scform{display:grid;gap:8px}
 .sclist{display:grid;gap:8px}
-.scitem{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
-.scitem.cur{background:var(--sunk);border-style:dashed}
+.scitem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 .scitem.act{border-color:var(--accent)}
-.scmeta{display:grid;gap:2px;min-width:0}
+.scmeta{display:grid;gap:4px;min-width:0}
 .scmeta b{overflow-wrap:anywhere}
-.scmeta .pill{justify-self:start}
-.scbar{position:relative;height:24px;background:var(--sunk);border-radius:5px;overflow:hidden}
-.scitem.cur .scbar{background:var(--surface)}
+.scname{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.scbar{position:relative;height:22px;background:var(--sunk);border-radius:5px;overflow:hidden}
 .scbar span{position:absolute;inset:0 auto 0 0;background:var(--accent-soft);border-right:2px solid var(--accent);transition:width .6s cubic-bezier(.2,.8,.2,1)}
-.scbar b{position:relative;display:block;padding:3px 8px;font-size:.8rem;font-weight:500}
-.scbtns{display:flex;gap:6px;flex-wrap:wrap}
+.scbar b{position:relative;display:block;padding:2px 8px;font-size:.78rem;font-weight:500}
+.scbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
 .scbtns .btn{padding:6px 10px;font-size:.85rem}
+.more{position:relative}
+.more summary{list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.more .menu{position:absolute;right:0;top:calc(100% + 4px);z-index:2;display:grid;min-width:150px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px;box-shadow:0 8px 24px rgb(0 0 0 / .14)}
+.more .menu button{border:0;background:none;text-align:left;padding:8px 10px;border-radius:6px;font-size:.88rem}
+.more .menu button:hover{background:var(--sunk)}
+.more .menu button.danger{color:var(--warn)}
+/* barre d'outils (résultats et comparaison) */
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:-8px 0 22px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.tb-left,.tb-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.saved{font-size:.8rem;color:var(--muted)}
+.brand{border:0;background:none;padding:0;text-align:left}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;text-underline-offset:3px;font-size:.9rem}
+.resume{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:16px 18px}
+.resume>div{display:grid;gap:3px;min-width:0}
+/* aide */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:8px 12px;border-bottom:2px solid transparent;color:var(--muted);font-size:.9rem;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.hlist{display:grid;gap:0}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.hrow:first-child{border-top:0}
+.hrow>div{display:grid;gap:2px;min-width:0}
+.pill.care{background:var(--warn-soft);color:var(--warn)}
+.hsteps{margin:0;padding-left:1.2em;display:grid;gap:8px}
+/* comparaison */
+.cv-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cv-col{display:grid;gap:10px;align-content:start;padding:14px;border:1px solid var(--line);border-top:4px solid var(--ca);border-radius:12px;background:var(--bg);min-width:0}
+.cv-col.a{--ca:var(--ferr)} .cv-col.b{--ca:var(--nr)}
+.cv-col select{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 10px;font:inherit}
+.cv-col .strats{gap:6px}
+.cv-col .chip{padding:5px 11px;font-size:.82rem}
+.cv-col.b .chip[aria-pressed="true"]{background:var(--nr);border-color:var(--nr);color:var(--surface)}
+.cv-diff{display:grid;gap:6px;font-size:.9rem}
+.cv-diff li{overflow-wrap:anywhere}
+.cv-m{display:grid}
+.cv-r{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(3,minmax(0,1fr));gap:10px;padding:10px 0;border-top:1px solid var(--line);align-items:baseline}
+.cv-r>span{min-width:0}
+.cv-r .v{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.cv-r.hd{border-top:0;padding-top:0;font:500 .72rem var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.cv-r.hd .v{font-family:var(--mono)}
+.cv-r.big .l{font-weight:600}
+.cv-r.big .v{font-size:1.05rem;font-weight:600}
+.cv-r .l{color:var(--muted)} .cv-r.big .l{color:var(--ink)}
+.gpos{color:var(--good)} .gneg{color:var(--warn)}
+.cv-lg i.dash{background:none;border-top:2px dashed var(--nr);height:0;width:16px;border-radius:0}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10;max-width:calc(100vw - 32px)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:860px){.wiz{grid-template-columns:1fr}.rail{position:static;grid-auto-flow:column;overflow-x:auto}.rail button span.t{display:none}.headline,.two{grid-template-columns:1fr}}
-@media (max-width:620px){.scitem{grid-template-columns:1fr}}
+@media (max-width:620px){.scitem,.resume{grid-template-columns:1fr}.scbtns{justify-content:flex-start}.cv-cols{grid-template-columns:1fr}.saved{display:none}}
+@media (max-width:560px){.cv-r{grid-template-columns:repeat(3,minmax(0,1fr))}.cv-r .l{grid-column:1/-1}.cv-r.hd .l{display:none}}
 @media (max-width:480px){.card{padding:18px}.dlg-in{padding:16px}.cmp-row{grid-template-columns:1fr}.tiles{grid-template-columns:1fr 1fr}.numbox input{width:96px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
   <header class="top">
-    <div class="brand">
+    <button class="brand" id="homeBtn">
       <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="16" width="6" height="12" rx="1.5" fill="var(--ferr)"/><rect x="12" y="9" width="6" height="19" rx="1.5" fill="var(--nr)"/><rect x="22" y="3" width="6" height="25" rx="1.5" fill="var(--tfsa)"/></svg>
       <b data-t="brand"></b>
-    </div>
+    </button>
     <div class="top-actions">
-      <button class="btn" id="editBtn" hidden data-t="edit"></button>
-      <button class="btn" id="sessBtn" data-t="sess_btn"></button>
-      <button class="btn primary" id="pdfBtn" data-t="pdf_btn"></button>
-      <button class="btn" id="themeBtn" aria-label="Thème"></button>
+      <button class="btn" id="helpBtn" data-t="help_btn"></button>
+      <button class="btn" id="themeBtn"></button>
       <div class="seg" role="group" aria-label="Langue / Language">
         <button id="lang-fr" aria-pressed="true">FR</button><button id="lang-en" aria-pressed="false">EN</button>
       </div>
     </div>
   </header>
+  <nav class="toolbar" id="toolbar" hidden>
+    <div class="tb-left"><button class="btn" id="editBtn" data-t="edit"></button><span class="saved" data-t="autosaved"></span></div>
+    <div class="tb-acts">
+      <button class="btn" id="saveBtn" data-t="save_btn"></button>
+      <button class="btn" id="scenBtn" data-t="scen_btn"></button>
+      <button class="btn" id="cmpBtn"></button>
+      <button class="btn" id="shareBtn"></button>
+      <button class="btn primary" id="pdfBtn" data-t="pdf_btn"></button>
+    </div>
+  </nav>
 
   <main id="wizard" class="wiz">
     <nav class="rail" id="rail" aria-label="Étapes"></nav>
@@ -223,8 +272,10 @@ details summary{cursor:pointer;font-weight:600}
   </main>
 
   <main id="sim" class="sim" hidden></main>
+  <main id="cmpv" class="sim" hidden></main>
 </div>
 <dialog id="sessDlg" class="dlg" aria-labelledby="sessT"></dialog>
+<dialog id="helpDlg" class="dlg" aria-labelledby="helpT"></dialog>
 
 <script>
 /*ENGINE*/
@@ -234,6 +285,12 @@ details summary{cursor:pointer;font-weight:600}
 </script>
 <script>
 /*REPORT*/
+</script>
+<script>
+/*COMPARE*/
+</script>
+<script>
+/*HELP*/
 </script>
 <script>
 /*SESSION*/

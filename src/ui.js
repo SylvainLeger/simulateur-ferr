@@ -11,6 +11,8 @@ const I18N = {
     w_l2: 'Chaque calcul est affiché étape par étape. Rien n\'est caché.',
     w_l3: 'Les réponses restent dans ce navigateur seulement.',
     w_disc: 'Outil éducatif basé sur les paramètres fiscaux 2026. Ce n\'est pas un conseil financier.',
+    rs_title: 'Votre simulation est en mémoire', rs_go: 'Reprendre ma simulation', rs_n: (n) => `${n} scénario${n > 1 ? 's' : ''} enregistré${n > 1 ? 's' : ''}`,
+    new_sim: 'Nouvelle simulation', new_ok: 'Confirmer : repartir des valeurs d\'exemple', new_done: 'Nouvelle simulation : les valeurs d\'exemple sont remplies.', w_priv: 'Où vont vos données ?',
     q_age: 'Quel âge a la personne en 2026 ?', h_age: 'C\'est l\'âge qui fixe le pourcentage minimum à retirer du FERR chaque année.',
     f_age: 'Âge en 2026', f_death: 'Simuler jusqu\'à quel âge ?', h_death: 'L\'année du décès, le solde restant du FERR est imposé en entier. Essayez plusieurs âges.',
     i_age: (a, p) => `À ${a} ans, le minimum à retirer est de <b>${p}</b> du solde. Ce pourcentage augmente chaque année jusqu'à 20 % à 95 ans.`,
@@ -94,6 +96,8 @@ const I18N = {
     w_l2: 'Every calculation is shown step by step. Nothing is hidden.',
     w_l3: 'Your answers stay in this browser only.',
     w_disc: 'Educational tool based on 2026 tax parameters. Not financial advice.',
+    rs_title: 'Your simulation is saved', rs_go: 'Resume my simulation', rs_n: (n) => `${n} saved scenario${n > 1 ? 's' : ''}`,
+    new_sim: 'New simulation', new_ok: 'Confirm: start over from the example values', new_done: 'New simulation: the example values are filled in.', w_priv: 'Where does your data go?',
     q_age: 'How old is the person in 2026?', h_age: 'Age sets the minimum percentage that must be withdrawn from the RRIF each year.',
     f_age: 'Age in 2026', f_death: 'Simulate up to what age?', h_death: 'In the year of death, the remaining RRIF balance is fully taxed. Try several ages.',
     i_age: (a, p) => `At age ${a}, the minimum withdrawal is <b>${p}</b> of the balance. It rises every year up to 20% at 95.`,
@@ -275,10 +279,23 @@ function renderWizard() {
   renderRail();
   const st = STEPS[S.step], card = $('#stepCard');
   if (st.id === 'welcome') {
+    const n = loadScen().length;
+    const nav = S.started
+      ? `<div class="resume"><div><b>${tr('rs_title')}</b><span class="small muted">${esc(resumeMeta())}</span></div><button class="btn primary" id="resumeBtn">${tr('rs_go')}</button></div>
+        <div class="wiz-nav"><button class="btn" id="newBtn">${tr('new_sim')}</button>${n ? `<button class="linkbtn" id="wScen">${tr('rs_n', n)}</button>` : ''}</div>`
+      : `<div class="wiz-nav"><button class="btn" id="exBtn">${tr('example')}</button><button class="btn primary" id="nextBtn">${tr('start')}</button></div>`;
     card.innerHTML = `<div class="step welcome ${dir < 0 ? 'back' : ''}"><div class="eyebrow">2026 · Québec</div><h2>${tr('w_title')}</h2><p class="lede">${tr('w_lede')}</p>
-      <ul><li>${tr('w_l1')}</li><li>${tr('w_l2')}</li><li>${tr('w_l3')}</li></ul><p class="small muted">${tr('w_disc')}</p>
-      <div class="wiz-nav"><button class="btn" id="exBtn">${tr('example')}</button><button class="btn primary" id="nextBtn">${tr('start')}</button></div></div>`;
-    $('#exBtn').onclick = () => { goSim(); };
+      <ul><li>${tr('w_l1')}</li><li>${tr('w_l2')}</li><li>${tr('w_l3')} <button class="linkbtn" id="wPriv">${tr('w_priv')}</button></li></ul><p class="small muted">${tr('w_disc')}</p>
+      ${nav}</div>`;
+    $('#wPriv').onclick = () => openHelp('data');
+    if (S.started) {
+      $('#resumeBtn').onclick = goSim;
+      const nb = $('#newBtn');
+      nb.onclick = () => arm(nb, 'new', 'new_sim', 'new_ok', () => { S = { ...DEFAULTS, ...keepPrefs(), started: true, step: 1 }; save(); dir = 1; renderWizard(); toast(tr('new_done')); });
+      if (n) $('#wScen').onclick = openScen;
+      return;
+    }
+    $('#exBtn').onclick = () => { S.started = true; goSim(); };
   } else {
     const q = { age: ['q_age', 'h_age'], account: ['q_account', 'h_account'], income: ['q_income', 'h_income'], household: ['q_household', 'h_household'], invest: ['q_invest', 'h_invest'], budget: ['q_budget', 'h_budget'] }[st.id];
     const last = S.step === STEPS.length - 1;
@@ -294,7 +311,7 @@ function renderWizard() {
       } else ins.innerHTML = insight(st.id);
     });
   }
-  $('#nextBtn').onclick = () => { if (S.step === STEPS.length - 1) goSim(); else { dir = 1; S.step++; save(); renderWizard(); } };
+  $('#nextBtn').onclick = () => { S.started = true; if (S.step === STEPS.length - 1) goSim(); else { dir = 1; S.step++; save(); renderWizard(); } };
 }
 
 /* ---------- simulation ---------- */
@@ -333,8 +350,21 @@ function realTot(r) {
   for (const y of r.years) { const h = y.h; o.tax += (h.ta.fed + h.ta.qc + h.ta.ramq - h.ta.sa + (h.tb ? h.tb.fed + h.tb.qc + h.tb.ramq - h.tb.sa : 0)) / y.k; o.claw += (h.ta.claw + (h.tb ? h.tb.claw : 0)) / y.k; o.dental += h.dentalLost / y.k; o.gis += (h.gis + h.sGis) / y.k; }
   o.tax += r.deathTax / r.kEnd; return o;
 }
-function goSim() { S.view = 'sim'; save(); $('#wizard').hidden = true; $('#sim').hidden = false; $('#editBtn').hidden = false; animNext = true; buildSim(); window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); }
-function goWizard() { stopPlay(); S.view = 'wizard'; S.step = 1; save(); $('#sim').hidden = true; $('#wizard').hidden = false; $('#editBtn').hidden = true; dir = 1; renderWizard(); }
+// Une seule vue visible : questionnaire (accueil = étape 0), résultats ou comparaison
+function showView() {
+  const v = S.view;
+  $('#wizard').hidden = v !== 'wizard'; $('#sim').hidden = v !== 'sim'; $('#cmpv').hidden = v !== 'cmp';
+  $('#toolbar').hidden = v === 'wizard';
+  $('#editBtn').hidden = v !== 'sim'; $('#saveBtn').hidden = v !== 'sim';
+  $('#cmpBtn').textContent = v === 'cmp' ? tr('cmp_back') : tr('cmp_btn');
+  $('#shareBtn').textContent = v === 'cmp' ? tr('share_cmp') : tr('share_btn');
+}
+function leaveSim() { stopPlay(); if (flowRAF) cancelAnimationFrame(flowRAF); flowRAF = null; }
+function goSim() { S.view = 'sim'; S.started = true; save(); showView(); animNext = true; buildSim(); window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); }
+function goWizard(step = 1) { leaveSim(); S.view = 'wizard'; S.step = step; save(); showView(); dir = step ? 1 : -1; renderWizard(); window.scrollTo({ top: 0 }); }
+const goHome = () => goWizard(0);
+const keepPrefs = () => ({ lang: S.lang, theme: S.theme });
+function resumeMeta() { return [S.scen, stratLabel(S), tr('sc_age', S.age, S.deathAge), `FERR ${money(S.ferr)}`].filter(Boolean).join(' · '); }
 
 function buildSim() {
   const el = $('#sim');
@@ -634,17 +664,25 @@ function applyLang() {
   document.documentElement.lang = S.lang;
   document.title = tr('brand');
   document.querySelectorAll('[data-t]').forEach(e => e.textContent = tr(e.dataset.t));
-  applyTheme();
+  applyTheme(); showView();
   $('#lang-fr').setAttribute('aria-pressed', String(S.lang === 'fr')); $('#lang-en').setAttribute('aria-pressed', String(S.lang === 'en'));
 }
-function isDark() { return S.theme ? S.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+// Mode clair par défaut, quel que soit le réglage de l'ordinateur ; le sombre seulement si on le choisit
+function isDark() { return S.theme === 'dark'; }
 function applyTheme() {
-  if (S.theme) document.documentElement.setAttribute('data-theme', S.theme);
+  document.documentElement.setAttribute('data-theme', isDark() ? 'dark' : 'light');
   const b = $('#themeBtn'); b.textContent = isDark() ? tr('th_light') : tr('th_dark');
 }
 $('#themeBtn').onclick = () => { S.theme = isDark() ? 'light' : 'dark'; save(); applyTheme(); };
-function setLang(l) { S.lang = l; save(); applyLang(); onLangChange(); if (S.view === 'sim') { stopPlay(); flowRAF && cancelAnimationFrame(flowRAF); flowRAF = null; buildSim(); } else renderWizard(); }
+function setLang(l) { S.lang = l; save(); applyLang(); onLangChange(); if (S.view === 'sim') { leaveSim(); buildSim(); } else if (S.view === 'cmp') buildCmp(); else renderWizard(); }
 $('#lang-fr').onclick = () => setLang('fr'); $('#lang-en').onclick = () => setLang('en');
-$('#editBtn').onclick = goWizard;
-// le démarrage est appelé par session.js, qui peut d'abord charger un lien de partage
-function boot() { applyLang(); if (S.view === 'sim') goSim(); else renderWizard(); }
+$('#editBtn').onclick = () => goWizard(1);
+$('#homeBtn').onclick = goHome;
+// le démarrage est appelé par session.js, qui peut d'abord charger un lien de partage ;
+// sans lien, on arrive toujours sur l'accueil
+function boot(fromLink) {
+  if (S.started === undefined) S.started = S.view === 'sim' || S.step > 0;
+  if (!fromLink) { S.view = 'wizard'; S.step = 0; }
+  applyLang();
+  if (S.view === 'sim') goSim(); else if (S.view === 'cmp') goCmp(); else { save(); showView(); renderWizard(); }
+}

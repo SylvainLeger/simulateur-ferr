@@ -15,12 +15,15 @@ En ligne / Live: https://simulateur-ferr-bnzvmrkrfa-uk.a.run.app
 
 | Fichier / File | Rôle / Role |
 |---|---|
-| `src/sim.src.html` | Gabarit HTML + CSS avec marqueurs `/*ENGINE*/`, `/*UI*/`, `/*REPORT*/`, `/*SESSION*/` |
+| `src/sim.src.html` | Gabarit HTML + CSS avec marqueurs `/*ENGINE*/`, `/*UI*/`, `/*REPORT*/`, `/*COMPARE*/`, `/*HELP*/`, `/*SESSION*/` |
 | `src/engine.js` | Calculs (impôt, PSV, minimum FERR…) / Calculations |
 | `src/ui.js` | Interface et questionnaire / UI and questionnaire |
 | `src/report.js` | Rapport PDF / PDF report |
-| `src/session.js` | Sauvegarde, scénarios, lien de partage / Save, scenarios, share link |
-| `build.py` | Assemble `dist/index.html` / Builds `dist/index.html` |
+| `src/compare.js` | Mode Comparer : deux scénarios côte à côte / Side-by-side comparison |
+| `src/help.js` | Fenêtre Aide, confidentialité / Help window, privacy |
+| `src/session.js` | Sauvegarde, Mes scénarios, lien de partage ; lance la page / Save, scenarios, share link; boots the page |
+| `src/icons/` | Icône de l'onglet (SVG + PNG) / Tab and home-screen icons |
+| `build.py` | Assemble `dist/index.html` et copie les icônes / Builds `dist/index.html` and copies the icons |
 | `Dockerfile`, `nginx.conf` | Image Cloud Run (build + nginx sur le port 8080) |
 | `deploy.sh` | Déploiement manuel de secours / Manual fallback deploy |
 
