@@ -6,11 +6,13 @@ const I18N = {
     yes: 'Oui', no: 'Non', years: 'ans',
     s_welcome: 'Bienvenue', s_age: 'Âge', s_account: 'Compte', s_income: 'Revenus', s_household: 'Ménage', s_invest: 'Placements', s_budget: 'Budget',
     w_title: 'Retirer le minimum de son FERR, ou plus ?',
-    w_lede: 'Ce simulateur compare, année par année, différentes façons de retirer l\'argent d\'un FERR pour un résident du Québec. Il calcule l\'impôt fédéral et du Québec, la récupération de la pension de la Sécurité de la vieillesse (PSV), le Supplément de revenu garanti, le Régime canadien de soins dentaires et le placement de l\'argent retiré.',
+    w_lede: 'Ce simulateur compare, année par année, différentes façons de retirer l\'argent d\'un FERR pour un résident du Québec. Il calcule l\'impôt fédéral et du Québec, la récupération de la pension de la Sécurité de la vieillesse (PSV), le Supplément de revenu garanti (SRG), le Régime canadien de soins dentaires et le placement de l\'argent retiré.',
     w_l1: 'Six questions courtes pour décrire la situation. Des valeurs d\'exemple sont déjà remplies.',
     w_l2: 'Chaque calcul est affiché étape par étape. Rien n\'est caché.',
     w_l3: 'Les réponses restent dans ce navigateur seulement.',
     w_disc: 'Outil éducatif basé sur les paramètres fiscaux 2026. Ce n\'est pas un conseil financier.',
+    rs_title: 'Votre simulation est en mémoire', rs_go: 'Reprendre ma simulation', wq_title: 'Questionnaire commencé', wq_go: (n) => `Continuer le questionnaire (étape ${n})`, rs_n: (n) => `${n} scénario${n > 1 ? 's' : ''} enregistré${n > 1 ? 's' : ''}`,
+    new_sim: 'Nouvelle simulation', new_ok: 'Confirmer : repartir des valeurs d\'exemple', new_done: 'Nouvelle simulation : les valeurs d\'exemple sont remplies.', w_priv: 'Où vont vos données ?',
     q_age: 'Quel âge a la personne en 2026 ?', h_age: 'C\'est l\'âge qui fixe le pourcentage minimum à retirer du FERR chaque année.',
     f_age: 'Âge en 2026', f_death: 'Simuler jusqu\'à quel âge ?', h_death: 'L\'année du décès, le solde restant du FERR est imposé en entier. Essayez plusieurs âges.',
     i_age: (a, p) => `À ${a} ans, le minimum à retirer est de <b>${p}</b> du solde. Ce pourcentage augmente chaque année jusqu'à 20 % à 95 ans.`,
@@ -43,40 +45,41 @@ const I18N = {
     ctl_lump: (n) => `Vider le FERR sur ${n} an${n > 1 ? 's' : ''}`, ctl_target: 'Revenu net visé chaque année (dollars de 2026)', ctl_fixed: 'Retrait annuel (dollars de 2026, au moins le minimum)',
     best_min: 'Aucune stratégie testée ne fait mieux que le minimum légal.', best_t: (x) => `La meilleure cible trouvée : un revenu net de ${x} par année.`,
     hl_lead: (age) => `Patrimoine laissé après impôt au décès à ${age} ans`, hl_unit: 'en dollars de 2026',
-    vs_min: (d) => `${d} par rapport au minimum légal`, same_min: 'C\'est la stratégie du minimum légal.',
+    vs_min: (d) => `${d} par rapport au minimum légal`, same_min: 'C\'est la stratégie du minimum légal.', tie_min: 'Même résultat que le minimum légal.', sep: ' : ', steps: 'Étapes', step_n: (i, t) => `Étape ${i} : ${t}`, place: 'Québec',
     t_tax: 'Impôts payés (vie + décès)', t_claw: 'PSV récupérée par l\'impôt', t_dent: 'Soins dentaires non couverts', t_gis: 'SRG reçu',
-    cmp_title: 'Comparaison des stratégies', cmp_sub: 'Patrimoine laissé après impôt au décès, en dollars de 2026. Cliquez sur une barre pour l\'explorer.',
-    c_min: 'Minimum légal', c_lump1: 'Tout sortir en 2026', c_lump3: 'Tout sortir sur 3 ans', c_t70: 'Viser 70 000 $ (seuil dentaire)', c_t95: 'Viser 95 323 $ (seuil PSV)', c_best: 'Meilleure cible trouvée', c_custom: 'Votre choix', best: 'meilleur',
+    cmp_title: 'Comparaison des stratégies', cmp_sub: 'Patrimoine laissé après impôt au décès, en dollars de 2026. Cliquez sur une barre pour l\'explorer.', k_sel: 'Stratégie choisie', k_other: 'Autre stratégie', k_bad: 'Laisse au moins 10 % de moins que la meilleure', k_tie: 'Les montants identiques sont à égalité : la pastille « meilleur » les marque tous.',
+    c_min: 'Minimum légal', c_lump1: 'Tout sortir en 2026', c_lump3: 'Tout sortir sur 3 ans', c_t70: 'Viser 69 000 $ (sous le seuil dentaire)', c_t95: 'Viser 95 323 $ (seuil PSV)', c_best: 'Meilleure cible trouvée', c_custom: 'Votre choix', best: 'meilleur',
     flow_title: 'Le parcours de l\'argent', year: 'Année', play: 'Lecture', pause: 'Pause',
-    n_ferr: 'Retrait du FERR', n_other: 'Autres revenus', n_draw: 'Épargne utilisée', n_mid: 'Argent de l\'année', n_tax: 'Impôts et PSV récupérée', n_spend: 'Dépenses', n_save: 'Placé au compte',
+    n_ferr: 'Retrait du FERR', n_other: 'Autres revenus', n_draw: 'Épargne utilisée', n_mid: 'Argent de l\'année', n_tax: 'Impôts, PSV récupérée', n_spend: 'Dépenses', n_save: 'Placé au compte',
     chain_title: 'Le calcul, étape par étape', dollar_title: 'Où va chaque dollar cette année',
     d_fed: 'Impôt fédéral', d_qc: 'Impôt du Québec', d_claw: 'PSV récupérée', d_misc: 'RAMQ et dentaire', d_spend: 'Dépenses', d_save: 'Épargne',
     ch_F: (y) => `Solde du FERR au 1er janvier ${y}`, ch_min: (a, p) => `Minimum légal à ${a} ans`, ch_minf: (F, p, m) => `${F} × ${p} = ${m}`,
     ch_frv: 'Maximum du FRV (approximatif)', ch_w: 'Retrait selon la stratégie', ch_extra: 'dont un retrait supplémentaire pour couvrir les dépenses',
-    ch_other: 'RRQ, rentes et autres revenus', ch_oas: 'PSV brute', ch_gis: 'Supplément de revenu garanti', ch_inv: 'Revenus du compte non enregistré', ch_invf: (i, d, g) => `intérêts ${i}, dividendes ${d} (majorés de 38 % dans le revenu), gains réalisés ${g}`,
+    ch_other: 'RRQ, rentes et autres revenus', ch_oas: 'PSV brute', ch_gis: 'Supplément de revenu garanti', ch_inv: 'Revenus imposables du compte non enregistré', ch_invf: (i, d, g) => `intérêts ${i}, dividendes ${d} majorés de 38 %, la moitié des gains réalisés ${g}`, ch_sinc: 'Revenus du conjoint (RRQ, rentes, autres)', ch_soas: 'PSV du conjoint', ch_sgis: 'SRG du conjoint',
     ch_net: 'Revenu net avant récupération de la PSV', ch_split: (x) => `après ${x} transférés au conjoint (fractionnement)`,
     ch_claw: 'Récupération de la PSV', ch_clawf: (n, s) => `15 % × (${n} − ${s})`, ch_clawn: (s) => `sous le seuil de ${s}`,
     ch_fed: 'Impôt fédéral', ch_fedf: (b, c) => `${b} selon les tranches, moins les crédits (personnel, âge, pension), puis abattement du Québec de 16,5 %`,
-    ch_qc: 'Impôt du Québec', ch_qcf: 'selon les tranches, moins les crédits (personnel, âge, retraite, personne seule)',
-    ch_misc: 'Prime RAMQ et crédit pour soutien des aînés', ch_spouse: 'Impôt et PSV récupérée du conjoint',
+    ch_qc: 'Impôt du Québec', ch_qcf: 'selon les tranches, moins les crédits (personnel, âge, retraite, personne seule)', ch_qcf2: 'selon les tranches, moins les crédits (personnel, âge, retraite)',
+    ch_misc: 'Prime RAMQ et crédit d\'impôt pour soutien aux aînés', ch_spouse: 'Impôt et PSV récupérée du conjoint',
     ch_dent: 'Soins dentaires', ch_dentf: (inc, st) => `revenu familial ${inc} : ${st}`, dent_free: 'couverts à 100 %', dent_40: 'quote-part de 40 %', dent_60: 'quote-part de 60 %', dent_none: 'non admissible', dent_ins: 'assurance privée',
     ch_spend: 'Dépenses du ménage', ch_res_s: 'Surplus placé', ch_res_d: 'Puisé dans l\'épargne', ch_resf_s: (b, t) => `compte non enregistré ${b}${t}`, ch_tfsa: (t) => `, CELI ${t}`,
-    ch_mr: 'Taux marginal effectif sur 1 000 $ de plus', ch_mrf: 'impôts + PSV récupérée + effet sur les soins dentaires',
-    ch_end: 'Soldes en fin d\'année', ch_endf: (f, b, t) => `FERR ${f} · compte ${b}${t}`,
+    ch_mr: 'Taux marginal effectif sur 1 000 $ de plus', ch_mrf: 'impôts + PSV récupérée + SRG perdu + effet sur les soins dentaires',
+    ch_end: 'Soldes en fin d\'année', ch_endf: (f, b, t) => `FERR ${f} · compte ${b}${t}`, hh: '(ménage)', nominal_tag: '(non indexé)',
     short: (x) => `Attention : les dépenses ne sont pas couvertes cette année (manque de ${x}).`,
     ch_death: 'Impôt au décès sur le solde du FERR et les gains latents',
     inc_title: 'Revenu net de la personne par année', inc_sub: 'En dollars de 2026. Les lignes pointillées montrent les seuils. Une barre coupée dépasse l\'échelle : sa valeur est indiquée en haut.',
     bal_title: 'Patrimoine par année', bal_sub: 'En dollars de 2026, avant l\'impôt au décès.',
-    lg_ferr: 'FERR', lg_nr: 'Compte non enregistré', lg_tfsa: 'CELI', thr_claw: 'début de la récupération de la PSV', thr_full: 'PSV entièrement perdue', thr_d70: 'soins dentaires gratuits sous', thr_d90: 'plus de soins dentaires dès', lg_under: 'sous le seuil de la PSV', lg_part: 'PSV en partie récupérée', lg_lost: 'PSV entièrement perdue',
+    lg_ferr: 'FERR', lg_nr: 'Compte non enregistré', lg_tfsa: 'CELI', thr_claw: 'récupération de la PSV dès', thr_full: 'PSV entièrement perdue dès', thr_d70: 'soins dentaires gratuits sous', thr_d90: 'aucune couverture dentaire dès', lg_under: 'sous le seuil de la PSV', lg_part: 'PSV en partie récupérée', lg_lost: 'PSV entièrement perdue',
     tbl_title: 'Tableau détaillé, année par année', tbl_real: 'Dollars de 2026', tbl_nom: 'Dollars courants',
     th: ['Année', 'Âge', 'FERR 1er janv.', 'Minimum', 'Retrait', 'Revenu net', 'PSV brute', 'PSV récupérée', 'Impôt féd.', 'Impôt QC', 'Dentaire', 'Dépenses', 'Épargne +/−', 'Compte', 'CELI', 'FERR 31 déc.'],
     adj_title: 'Ajuster rapidement',
     notes_title: 'Hypothèses et limites',
     notes: [
       'Paramètres fiscaux 2026 (Québec et fédéral), indexés chaque année au taux d\'inflation choisi. Les seuils du régime dentaire ne sont pas indexés.',
+      'Le minimum utilise l\'âge saisi comme âge au 1er janvier 2026 (à 71 ans et plus, selon la table officielle). La « meilleure stratégie » essaie des revenus visés de 20 000 $ à 320 000 $, ce n\'est pas une recherche exhaustive.',
       'Le minimum utilise l\'âge de la personne au début de l\'année. Le maximum du FRV est une approximation (rente certaine jusqu\'à 90 ans à 6 %).',
       'La récupération de la PSV est calculée sur le revenu de l\'année, même si en réalité elle est retenue sur les versements de juillet à juin suivants.',
-      'Le SRG, la prime RAMQ et le crédit pour soutien des aînés sont des approximations. Le SRG est calculé sur le revenu de l\'année plutôt que celui de l\'année précédente.',
+      'Le SRG, la prime RAMQ et le crédit d\'impôt pour soutien aux aînés sont des approximations. Le SRG est calculé sur le revenu de l\'année plutôt que celui de l\'année précédente.',
       'Au décès, le solde du FERR et les gains en capital latents sont imposés dans la dernière déclaration, même en couple. On mesure ainsi l\'impôt qui sera payé tôt ou tard.',
       'Le compte non enregistré appartient à la personne. Si les dépenses dépassent les revenus, on puise dans ce compte, puis dans le CELI, puis on retire plus du FERR.',
       'Outil éducatif. Pour une décision réelle, validez avec un planificateur financier ou un fiscaliste.'
@@ -89,11 +92,13 @@ const I18N = {
     yes: 'Yes', no: 'No', years: 'yrs',
     s_welcome: 'Welcome', s_age: 'Age', s_account: 'Account', s_income: 'Income', s_household: 'Household', s_invest: 'Investments', s_budget: 'Budget',
     w_title: 'Withdraw the RRIF minimum, or more?',
-    w_lede: 'This simulator compares, year by year, different ways to draw money from a RRIF (FERR) for a Quebec resident. It computes federal and Quebec income tax, the Old Age Security (OAS) recovery tax, the Guaranteed Income Supplement, the Canadian Dental Care Plan and how the withdrawn money is invested.',
+    w_lede: 'This simulator compares, year by year, different ways to draw money from a RRIF (FERR) for a Quebec resident. It computes federal and Quebec income tax, the Old Age Security (OAS) recovery tax, the Guaranteed Income Supplement (GIS), the Canadian Dental Care Plan and how the withdrawn money is invested.',
     w_l1: 'Six short questions describe the situation. Example values are already filled in.',
     w_l2: 'Every calculation is shown step by step. Nothing is hidden.',
     w_l3: 'Your answers stay in this browser only.',
     w_disc: 'Educational tool based on 2026 tax parameters. Not financial advice.',
+    rs_title: 'Your simulation is saved', rs_go: 'Resume my simulation', wq_title: 'Questionnaire in progress', wq_go: (n) => `Continue the questionnaire (step ${n})`, rs_n: (n) => `${n} saved scenario${n > 1 ? 's' : ''}`,
+    new_sim: 'New simulation', new_ok: 'Confirm: start over from the example values', new_done: 'New simulation: the example values are filled in.', w_priv: 'Where does your data go?',
     q_age: 'How old is the person in 2026?', h_age: 'Age sets the minimum percentage that must be withdrawn from the RRIF each year.',
     f_age: 'Age in 2026', f_death: 'Simulate up to what age?', h_death: 'In the year of death, the remaining RRIF balance is fully taxed. Try several ages.',
     i_age: (a, p) => `At age ${a}, the minimum withdrawal is <b>${p}</b> of the balance. It rises every year up to 20% at 95.`,
@@ -106,7 +111,7 @@ const I18N = {
     f_rrq: 'Quebec Pension Plan (QPP/RRQ)', f_rente: 'Employer pension plan', f_other: 'Other taxable income', f_oas: 'Receives Old Age Security (OAS)?',
     od_oas_y: 'About $9,150 a year at 65 to 74, $10,065 at 75 and over.', od_oas_n: 'For example if deferred or not eligible.',
     i_income: (x) => `Estimated 2026 income with the minimum: <span class="big">${x}</span>`,
-    g_free: 'free dental', g_claw: 'OAS clawback starts', g_full: 'OAS fully lost',
+    g_free: 'free dental', g_claw: 'OAS recovery starts', g_full: 'OAS fully lost',
     q_household: 'Does the person live alone?', h_household: 'A spouse changes the tax (pension income splitting) and the family income used for dental care.',
     o_alone: 'Alone', od_alone: 'Quebec credit for a person living alone.', o_couple: 'With a spouse', od_couple: 'The spouse\'s income is taken into account.',
     f_sAge: 'Spouse\'s age in 2026', f_sInc: 'Spouse\'s yearly income (QPP, pensions, other, excluding OAS)', f_sOas: 'Spouse receives OAS (if 65 or older)?', f_split: 'Split pension income with the spouse?',
@@ -125,26 +130,26 @@ const I18N = {
     ctl_lump: (n) => `Empty the RRIF over ${n} year${n > 1 ? 's' : ''}`, ctl_target: 'Target net income each year (2026 dollars)', ctl_fixed: 'Yearly withdrawal (2026 dollars, at least the minimum)',
     best_min: 'No strategy tested beats the legal minimum.', best_t: (x) => `Best target found: a net income of ${x} a year.`,
     hl_lead: (age) => `Estate left after tax at death at age ${age}`, hl_unit: 'in 2026 dollars',
-    vs_min: (d) => `${d} compared with the legal minimum`, same_min: 'This is the legal minimum strategy.',
+    vs_min: (d) => `${d} compared with the legal minimum`, same_min: 'This is the legal minimum strategy.', tie_min: 'Same result as the legal minimum.', sep: ': ', steps: 'Steps', step_n: (i, t) => `Step ${i}: ${t}`, place: 'Quebec',
     t_tax: 'Taxes paid (lifetime + death)', t_claw: 'OAS recovered through tax', t_dent: 'Dental care not covered', t_gis: 'GIS received',
-    cmp_title: 'Strategy comparison', cmp_sub: 'Estate left after tax at death, in 2026 dollars. Click a bar to explore it.',
-    c_min: 'Legal minimum', c_lump1: 'Take it all out in 2026', c_lump3: 'Take it all out over 3 years', c_t70: 'Target $70,000 (dental threshold)', c_t95: 'Target $95,323 (OAS threshold)', c_best: 'Best target found', c_custom: 'Your choice', best: 'best',
+    cmp_title: 'Strategy comparison', cmp_sub: 'Estate left after tax at death, in 2026 dollars. Click a bar to explore it.', k_sel: 'Chosen strategy', k_other: 'Other strategy', k_bad: 'Leaves at least 10% less than the best', k_tie: 'Identical amounts are tied: the “best” tag marks all of them.',
+    c_min: 'Legal minimum', c_lump1: 'Take it all out in 2026', c_lump3: 'Take it all out over 3 years', c_t70: 'Target $69,000 (below the dental threshold)', c_t95: 'Target $95,323 (OAS threshold)', c_best: 'Best target found', c_custom: 'Your choice', best: 'best',
     flow_title: 'Where the money goes', year: 'Year', play: 'Play', pause: 'Pause',
-    n_ferr: 'RRIF withdrawal', n_other: 'Other income', n_draw: 'Savings used', n_mid: 'Money for the year', n_tax: 'Taxes and OAS recovered', n_spend: 'Spending', n_save: 'Invested',
+    n_ferr: 'RRIF withdrawal', n_other: 'Other income', n_draw: 'Savings used', n_mid: 'Money for the year', n_tax: 'Taxes, OAS recovery', n_spend: 'Spending', n_save: 'Invested',
     chain_title: 'The calculation, step by step', dollar_title: 'Where each dollar goes this year',
     d_fed: 'Federal tax', d_qc: 'Quebec tax', d_claw: 'OAS recovered', d_misc: 'RAMQ and dental', d_spend: 'Spending', d_save: 'Savings',
     ch_F: (y) => `RRIF balance on January 1, ${y}`, ch_min: (a, p) => `Legal minimum at age ${a}`, ch_minf: (F, p, m) => `${F} × ${p} = ${m}`,
     ch_frv: 'LIF maximum (approximate)', ch_w: 'Withdrawal under the strategy', ch_extra: 'including an extra withdrawal to cover spending',
-    ch_other: 'QPP, pensions and other income', ch_oas: 'Gross OAS', ch_gis: 'Guaranteed Income Supplement', ch_inv: 'Non-registered account income', ch_invf: (i, d, g) => `interest ${i}, dividends ${d} (grossed up 38% in income), realized gains ${g}`,
+    ch_other: 'QPP, pensions and other income', ch_oas: 'Gross OAS', ch_gis: 'Guaranteed Income Supplement', ch_inv: 'Taxable non-registered account income', ch_invf: (i, d, g) => `interest ${i}, dividends ${d} grossed up by 38%, half of realized gains ${g}`, ch_sinc: 'Spouse\'s income (QPP, pensions, other)', ch_soas: 'Spouse\'s OAS', ch_sgis: 'Spouse\'s GIS',
     ch_net: 'Net income before OAS recovery', ch_split: (x) => `after ${x} transferred to the spouse (splitting)`,
     ch_claw: 'OAS recovery tax', ch_clawf: (n, s) => `15% × (${n} − ${s})`, ch_clawn: (s) => `below the ${s} threshold`,
     ch_fed: 'Federal tax', ch_fedf: (b, c) => `${b} from the brackets, minus credits (basic, age, pension), then the 16.5% Quebec abatement`,
-    ch_qc: 'Quebec tax', ch_qcf: 'from the brackets, minus credits (basic, age, retirement, living alone)',
+    ch_qc: 'Quebec tax', ch_qcf: 'from the brackets, minus credits (basic, age, retirement, living alone)', ch_qcf2: 'from the brackets, minus credits (basic, age, retirement)',
     ch_misc: 'RAMQ premium and senior assistance credit', ch_spouse: 'Spouse\'s tax and OAS recovery',
     ch_dent: 'Dental care', ch_dentf: (inc, st) => `family income ${inc}: ${st}`, dent_free: '100% covered', dent_40: '40% co-payment', dent_60: '60% co-payment', dent_none: 'not eligible', dent_ins: 'private insurance',
     ch_spend: 'Household spending', ch_res_s: 'Surplus invested', ch_res_d: 'Drawn from savings', ch_resf_s: (b, t) => `non-registered ${b}${t}`, ch_tfsa: (t) => `, TFSA ${t}`,
-    ch_mr: 'Effective marginal rate on $1,000 more', ch_mrf: 'taxes + OAS recovery + effect on dental care',
-    ch_end: 'Year-end balances', ch_endf: (f, b, t) => `RRIF ${f} · account ${b}${t}`,
+    ch_mr: 'Effective marginal rate on $1,000 more', ch_mrf: 'taxes + OAS recovery + lost GIS + effect on dental care',
+    ch_end: 'Year-end balances', hh: '(household)', nominal_tag: '(not indexed)', ch_endf: (f, b, t) => `RRIF ${f} · account ${b}${t}`,
     short: (x) => `Warning: spending is not covered this year (short by ${x}).`,
     ch_death: 'Tax at death on the RRIF balance and unrealized gains',
     inc_title: 'The person\'s net income by year', inc_sub: 'In 2026 dollars. Dotted lines show the thresholds. A cut bar goes beyond the scale: its value is shown at the top.',
@@ -156,6 +161,7 @@ const I18N = {
     notes_title: 'Assumptions and limits',
     notes: [
       '2026 tax parameters (Quebec and federal), indexed each year at the chosen inflation rate. Dental plan thresholds are not indexed.',
+      'The age entered is treated as the age on January 1, 2026 (from 71, using the official table). The “best strategy” tries income targets from $20,000 to $320,000; it is not an exhaustive search.',
       'The minimum uses the person\'s age at the start of the year. The LIF maximum is an approximation (annuity certain to age 90 at 6%).',
       'The OAS recovery tax is computed on the same year\'s income, although in reality it is withheld from the following July-to-June payments.',
       'GIS, the RAMQ premium and the senior assistance credit are approximations. GIS uses the same year\'s income rather than the previous year\'s.',
@@ -163,23 +169,36 @@ const I18N = {
       'The non-registered account belongs to the person. If spending exceeds income, money comes from that account, then the TFSA, then extra RRIF withdrawals.',
       'Educational tool. For a real decision, check with a financial planner or tax specialist.'
     ],
-    research: 'Detailed research on the rules',
+    research: 'Detailed research on the rules (in French)',
   }
 };
 
 const DEFAULTS = { age: 80, deathAge: 92, type: 'ferr', ferr: 1100000, rF: 5, rrq: 15000, rente: 0, other: 0, oas: true, couple: false, sAge: 78, sInc: 20000, sOas: true, split: true, nr: 0, rNR: 5, mixI: 40, mixD: 30, mixG: 30, tfsaUse: false, tfsa: 0, tfsaRoom: 0, spend: 50000, inf: 2, dentalIns: false, dentalVal: 1200,
-  strat: 'min', lumpYears: 1, target: 95323, fixed: 90000, real: true, lang: 'fr', view: 'wizard', step: 0, sel: 0, scen: '' };
+  strat: 'min', lumpYears: 1, target: 95323, tnom: false, fixed: 90000, real: true, lang: 'fr', view: 'wizard', step: 0, sel: 0, scen: '' };
 let S = { ...DEFAULTS };
-try { const s = JSON.parse(localStorage.getItem('ferrsim') || 'null'); if (s) S = { ...DEFAULTS, ...s }; } catch (e) { }
+try { const s = JSON.parse(localStorage.getItem('ferrsim') || 'null'); if (s && typeof s === 'object') S = { ...DEFAULTS, ...s }; } catch (e) { }
+if (S.lang !== 'fr' && S.lang !== 'en') S.lang = 'fr';
+// Bornes de chaque champ : les mêmes que les curseurs (les cases acceptent jusqu'à 10 fois plus pour les montants)
+const RANGES = { age: [55, 100], deathAge: [55, 105], ferr: [0, 40e6], rF: [0, 10], rrq: [0, 250000], rente: [0, 1.5e6], other: [0, 1.5e6],
+  sAge: [50, 100], sInc: [0, 2e6], nr: [0, 30e6], rNR: [0, 10], mixI: [0, 100], mixD: [0, 100], mixG: [0, 100], tfsa: [0, 5e6], tfsaRoom: [0, 2e6],
+  spend: [0, 3e6], inf: [0, 6], dentalVal: [0, 50000], lumpYears: [1, 5], target: [20000, 250000], fixed: [0, 500000], sel: [0, 60], step: [0, 6] };
+const clamp = (k, v) => RANGES[k] ? Math.min(RANGES[k][1], Math.max(RANGES[k][0], v)) : v;
+const T70 = 69000;
+const fullClaw = age => P.clawThr + oasFor(Math.max(65, age), 1) / P.clawRate;
 function save() { try { localStorage.setItem('ferrsim', JSON.stringify(S)); } catch (e) { } }
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = (s, el = document) => el.querySelector(s);
 const L = () => I18N[S.lang];
-const tr = (k, ...a) => { const v = L()[k]; return typeof v === 'function' ? v(...a) : (v ?? k); };
+// En français, une espace fine insécable avant « : ; ? ! % » et à l'intérieur des guillemets, pour éviter les retours à la ligne
+const frTypo = x => x.replace(/ ([?:!;»%])/g, '\u202f$1').replace(/« /g, '«\u202f');
+const typo = x => S.lang === 'fr' && typeof x === 'string' ? frTypo(x) : x;
+const tr = (k, ...a) => { const v = L()[k]; return typo(typeof v === 'function' ? v(...a) : (v ?? k)); };
+const trl = k => L()[k].map(typo);
 const loc = () => S.lang === 'fr' ? 'fr-CA' : 'en-CA';
 const money = x => new Intl.NumberFormat(loc(), { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(Math.round(x || 0));
 const pct = (x, d = 2) => new Intl.NumberFormat(loc(), { style: 'percent', minimumFractionDigits: d, maximumFractionDigits: d }).format(x);
 const num = x => new Intl.NumberFormat(loc(), { maximumFractionDigits: 2 }).format(x);
+const kmoney = v => S.lang === 'fr' ? `${Math.round(v / 1000)}\u00a0k$` : `$${Math.round(v / 1000)}k`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 function tween(el, to, fmt, dur = 700) {
@@ -200,7 +219,7 @@ function numField(k, labelKey, o) {
     <div class="numbox"><input id="${id}" type="number" inputmode="decimal" data-k="${k}" min="${o.min}" max="${o.max * (o.unit === '$' ? 10 : 1)}" step="${o.step}" value="${S[k]}"><span>${unit}</span></div></div></div>`;
 }
 function choiceField(k, labelKey, opts) {
-  return `<div class="field">${labelKey ? `<label>${tr(labelKey)}</label>` : ''}<div class="choices">${opts.map(o =>
+  return `<div class="field">${labelKey ? `<label id="lb_${k}">${tr(labelKey)}</label>` : ''}<div class="choices" role="group" ${labelKey ? `aria-labelledby="lb_${k}"` : `aria-label="${esc(opts.map(o => tr(o.l)).join(' / '))}"`}>${opts.map(o =>
     `<button class="choice" data-ck="${k}" data-cv="${o.v}" aria-pressed="${String(S[k]) === String(o.v)}"><b>${tr(o.l)}</b>${o.d ? `<span>${tr(o.d)}</span>` : ''}</button>`).join('')}</div></div>`;
 }
 const yesNo = (k, l, dy, dn) => choiceField(k, l, [{ v: true, l: 'yes', d: dy }, { v: false, l: 'no', d: dn }]);
@@ -208,8 +227,9 @@ function bindFields(root, onChange) {
   root.querySelectorAll('input[data-k]').forEach(inp => {
     inp.addEventListener('input', () => {
       const k = inp.dataset.k; let v = parseFloat(inp.value); if (isNaN(v)) return;
-      S[k] = v;
+      v = clamp(k, v); S[k] = v;
       root.querySelectorAll(`input[data-k="${k}"]`).forEach(o => { if (o !== inp) o.value = v; });
+      if (k === 'deathAge' && S.deathAge <= S.age) S.deathAge = Math.min(105, S.age + 1);
       if (k === 'age' && S.deathAge <= S.age) { S.deathAge = S.age + 1; root.querySelectorAll('input[data-k="deathAge"]').forEach(o => o.value = S.deathAge); }
       save(); onChange && onChange(k);
     });
@@ -229,8 +249,9 @@ const STEPS = [
 ];
 let dir = 1;
 function renderRail() {
-  $('#rail').innerHTML = STEPS.map((s, i) => `<button class="${i < S.step ? 'done' : ''} ${i === S.step ? 'cur' : ''}" data-go="${i}" aria-current="${i === S.step ? 'step' : 'false'}"><span class="dot">${i}</span><span class="t">${tr(s.t)}</span></button>`).join('');
-  $('#rail').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { const g = +b.dataset.go; dir = g >= S.step ? 1 : -1; S.step = g; save(); renderWizard(); });
+  $('#rail').setAttribute('aria-label', tr('steps'));
+  $('#rail').innerHTML = STEPS.map((s, i) => `<button class="${i < S.step ? 'done' : ''} ${i === S.step ? 'cur' : ''}" data-go="${i}" aria-label="${esc(tr('step_n', i, tr(s.t)))}" aria-current="${i === S.step ? 'step' : 'false'}"><span class="dot" aria-hidden="true">${i}</span><span class="t" aria-hidden="true">${tr(s.t)}</span></button>`).join('');
+  $('#rail').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { const g = +b.dataset.go; dir = g >= S.step ? 1 : -1; S.step = g; save(); refocus = 'h2'; renderWizard(); });
 }
 function minIncomeEstimate() {
   const oas = S.oas ? oasFor(S.age, 1) : 0;
@@ -238,10 +259,11 @@ function minIncomeEstimate() {
 }
 function gaugeHTML(x) {
   const max = 180000, p = v => Math.min(100, v / max * 100);
-  const full = S.age >= 75 ? 161320 : 155320;
+  const full = fullClaw(S.age);
   const marks = [[70000, 'g_free'], [P.clawThr, 'g_claw'], [full, 'g_full']];
+  // Les seuils de 70 000 $ et 95 323 $ sont proches : l'étiquette du milieu passe au-dessus de la barre, les deux autres finissent à leur repère
   return `<div class="gauge" aria-hidden="true"><div class="track" style="background:linear-gradient(90deg,var(--accent-soft) 0 ${p(P.clawThr)}%,var(--warn-soft) ${p(P.clawThr)}% ${p(full)}%,var(--sunk) ${p(full)}% 100%)"></div>
-    ${marks.map(([v, l]) => `<div class="mark" style="left:${p(v)}%"><span style="${v > 150000 ? 'transform:translateX(-90%)' : ''}">${tr(l)}</span></div>`).join('')}
+    ${marks.map(([v, l], i) => `<div class="mark ${i === 1 ? 'up' : 'end'}" style="left:${p(v)}%"><span>${tr(l)} · ${kmoney(v)}</span></div>`).join('')}
     <div class="pin" id="pin" style="left:${p(x)}%"><i></i></div></div>`;
 }
 function insight(id) {
@@ -275,36 +297,60 @@ function renderWizard() {
   renderRail();
   const st = STEPS[S.step], card = $('#stepCard');
   if (st.id === 'welcome') {
-    card.innerHTML = `<div class="step welcome ${dir < 0 ? 'back' : ''}"><div class="eyebrow">2026 · Québec</div><h2>${tr('w_title')}</h2><p class="lede">${tr('w_lede')}</p>
-      <ul><li>${tr('w_l1')}</li><li>${tr('w_l2')}</li><li>${tr('w_l3')}</li></ul><p class="small muted">${tr('w_disc')}</p>
-      <div class="wiz-nav"><button class="btn" id="exBtn">${tr('example')}</button><button class="btn primary" id="nextBtn">${tr('start')}</button></div></div>`;
-    $('#exBtn').onclick = () => { goSim(); };
+    const n = loadScen().length;
+    const mid = !S.started && S.wstep > 0;
+    const nav = S.started || mid
+      ? `<div class="resume"><div><b>${tr(mid ? 'wq_title' : 'rs_title')}</b><span class="small muted">${esc(resumeMeta())}</span></div><button class="btn primary" id="resumeBtn">${mid ? tr('wq_go', S.wstep) : tr('rs_go')}</button></div>
+        <div class="wiz-nav"><button class="btn" id="newBtn">${tr('new_sim')}</button>${n ? `<button class="linkbtn" id="wScen">${tr('rs_n', n)}</button>` : ''}</div>`
+      : `<div class="wiz-nav"><button class="btn" id="exBtn">${tr('example')}</button><button class="btn primary" id="nextBtn">${tr('start')}</button></div>`;
+    card.innerHTML = `<div class="step welcome ${dir < 0 ? 'back' : ''}"><div class="eyebrow">2026 · ${tr('place')}</div><h2 tabindex="-1">${tr('w_title')}</h2><p class="lede">${tr('w_lede')}</p>
+      <ul><li>${tr('w_l1')}</li><li>${tr('w_l2')}</li><li>${tr('w_l3')} <button class="linkbtn" id="wPriv">${tr('w_priv')}</button></li></ul><p class="small muted">${tr('w_disc')}</p>
+      ${nav}</div>`;
+    $('#wPriv').onclick = () => openHelp('data');
+    if (S.started || mid) {
+      $('#resumeBtn').onclick = () => mid ? goWizard(S.wstep) : goSim();
+      const nb = $('#newBtn');
+      nb.onclick = () => arm(nb, 'new', 'new_sim', 'new_ok', () => { leaveSim(); S = { ...DEFAULTS, ...keepPrefs(), started: false }; save(); goWizard(1); toast(tr('new_done')); });
+      if (n) $('#wScen').onclick = openScen;
+      afterRender(card);
+      return;
+    }
+    $('#exBtn').onclick = goSim;
   } else {
     const q = { age: ['q_age', 'h_age'], account: ['q_account', 'h_account'], income: ['q_income', 'h_income'], household: ['q_household', 'h_household'], invest: ['q_invest', 'h_invest'], budget: ['q_budget', 'h_budget'] }[st.id];
     const last = S.step === STEPS.length - 1;
-    card.innerHTML = `<div class="step ${dir < 0 ? 'back' : ''}"><div><div class="eyebrow">${S.step} / ${STEPS.length - 1}</div><h2>${tr(q[0])}</h2><p class="muted" style="margin-top:6px">${tr(q[1])}</p></div>
+    card.innerHTML = `<div class="step ${dir < 0 ? 'back' : ''}"><div><div class="eyebrow">${S.step} / ${STEPS.length - 1}</div><h2 tabindex="-1">${tr(q[0])}</h2><p class="muted" style="margin-top:6px">${tr(q[1])}</p></div>
       <div class="fields">${stepBody(st.id)}</div><div class="insight" id="insight">${insight(st.id)}</div>
       <div class="wiz-nav"><button class="btn" id="prevBtn">${tr('back')}</button><button class="btn primary" id="nextBtn">${last ? tr('launch') : tr('next')}</button></div></div>`;
-    $('#prevBtn').onclick = () => { dir = -1; S.step--; save(); renderWizard(); };
+    S.wstep = S.step;
+    $('#prevBtn').onclick = () => { dir = -1; S.step--; save(); refocus = 'h2'; goWizard(S.step, true); };
     bindFields(card, (k, structural) => {
-      if (structural && ['couple', 'tfsaUse', 'dentalIns', 'type'].includes(k)) { dir = 0; renderWizard(); return; }
+      if (structural && ['couple', 'tfsaUse', 'dentalIns', 'type'].includes(k)) { dir = 0; refocus = `[data-ck="${k}"][aria-pressed="true"]`; renderWizard(); return; }
       const ins = $('#insight'); const pin = $('#pin');
       if (pin && ['income', 'household', 'invest', 'budget'].includes(st.id)) {
         const x = minIncomeEstimate(); ins.querySelector('p').innerHTML = tr('i_income', money(x)); pin.style.left = Math.min(100, x / 180000 * 100) + '%';
       } else ins.innerHTML = insight(st.id);
     });
   }
-  $('#nextBtn').onclick = () => { if (S.step === STEPS.length - 1) goSim(); else { dir = 1; S.step++; save(); renderWizard(); } };
+  $('#nextBtn').onclick = () => { if (S.step === STEPS.length - 1) goSim(); else { dir = 1; refocus = 'h2'; goWizard(S.step + 1, true); } };
+  afterRender(card);
+}
+// Après un changement d'étape, le focus clavier va au titre (ou au choix qui vient d'être fait)
+let refocus = null;
+function afterRender(root) {
+  if (!refocus) return;
+  const el = root.querySelector(refocus); refocus = null;
+  if (el) el.focus({ preventScroll: true });
 }
 
 /* ---------- simulation ---------- */
-let R = null, CMP = [], BEST = null, animNext = true, playing = null;
+let R = null, CMP = [], BEST = null, SELKEY = 'min', animNext = true, playing = null;
 function inputs() { return { ...S }; }
 function stratObj(key) {
   switch (key || S.strat) {
     case 'min': return { kind: 'min' };
     case 'lump': return { kind: 'lump', years: S.lumpYears };
-    case 'target': return { kind: 'target', amount: S.target };
+    case 'target': return { kind: 'target', amount: S.target, nominal: S.tnom };
     case 'fixed': return { kind: 'fixed', amount: S.fixed };
     case 'best': return BEST && BEST.useMin ? { kind: 'min' } : { kind: 'target', amount: BEST ? BEST.T : S.target };
   }
@@ -319,13 +365,17 @@ function compute() {
     { key: 'min', l: 'c_min', r: rmin, st: 'min' },
     { key: 'lump1', l: 'c_lump1', r: simulate(inp, { kind: 'lump', years: 1 }), st: 'lump', set: () => S.lumpYears = 1 },
     { key: 'lump3', l: 'c_lump3', r: simulate(inp, { kind: 'lump', years: 3 }), st: 'lump', set: () => S.lumpYears = 3 },
-    { key: 't70', l: 'c_t70', r: simulate(inp, { kind: 'target', amount: 70000 }), st: 'target', set: () => S.target = 70000 },
-    { key: 't95', l: 'c_t95', r: simulate(inp, { kind: 'target', amount: P.clawThr }), st: 'target', set: () => S.target = P.clawThr },
+    // 69 000 $ non indexé : les seuils du régime dentaire ne suivent pas l'inflation
+    { key: 't70', l: 'c_t70', r: simulate(inp, { kind: 'target', amount: T70, nominal: true }), st: 'target', set: () => { S.target = T70; S.tnom = true; } },
+    { key: 't95', l: 'c_t95', r: simulate(inp, { kind: 'target', amount: P.clawThr }), st: 'target', set: () => { S.target = P.clawThr; S.tnom = false; } },
     { key: 'best', l: 'c_best', r: BEST.r, st: 'best' },
   ];
   R = S.strat === 'best' ? BEST.r : simulate(inp, stratObj());
-  const isPreset = (S.strat === 'min') || (S.strat === 'best') || (S.strat === 'lump' && [1, 3].includes(S.lumpYears)) || (S.strat === 'target' && [70000, P.clawThr].includes(S.target));
-  if (!isPreset) CMP.push({ key: 'custom', l: 'c_custom', r: R, st: S.strat });
+  // Une seule barre correspond à la stratégie choisie
+  SELKEY = S.strat === 'min' ? 'min' : S.strat === 'best' ? 'best'
+    : S.strat === 'lump' && [1, 3].includes(S.lumpYears) ? 'lump' + S.lumpYears
+    : S.strat === 'target' && S.tnom && S.target === T70 ? 't70' : S.strat === 'target' && !S.tnom && S.target === P.clawThr ? 't95' : 'custom';
+  if (SELKEY === 'custom') CMP.push({ key: 'custom', l: 'c_custom', r: R, st: S.strat });
   S.sel = Math.min(S.sel, R.years.length - 1);
 }
 function realTot(r) {
@@ -333,8 +383,34 @@ function realTot(r) {
   for (const y of r.years) { const h = y.h; o.tax += (h.ta.fed + h.ta.qc + h.ta.ramq - h.ta.sa + (h.tb ? h.tb.fed + h.tb.qc + h.tb.ramq - h.tb.sa : 0)) / y.k; o.claw += (h.ta.claw + (h.tb ? h.tb.claw : 0)) / y.k; o.dental += h.dentalLost / y.k; o.gis += (h.gis + h.sGis) / y.k; }
   o.tax += r.deathTax / r.kEnd; return o;
 }
-function goSim() { S.view = 'sim'; save(); $('#wizard').hidden = true; $('#sim').hidden = false; $('#editBtn').hidden = false; animNext = true; buildSim(); window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); }
-function goWizard() { stopPlay(); S.view = 'wizard'; S.step = 1; save(); $('#sim').hidden = true; $('#wizard').hidden = false; $('#editBtn').hidden = true; dir = 1; renderWizard(); }
+// Une seule vue visible : questionnaire (accueil = étape 0), résultats ou comparaison
+function showView() {
+  const v = S.view;
+  $('#wizard').hidden = v !== 'wizard'; $('#sim').hidden = v !== 'sim'; $('#cmpv').hidden = v !== 'cmp';
+  $('#toolbar').hidden = v === 'wizard';
+  $('#editBtn').hidden = v !== 'sim'; $('#saveBtn').hidden = v !== 'sim'; $('#pdfBtn').hidden = v === 'cmp';
+  $('#cmpBtn').textContent = v === 'cmp' ? tr('cmp_back') : tr('cmp_btn');
+  $('#shareBtn').textContent = v === 'cmp' ? tr('share_cmp') : tr('share_btn');
+}
+function leaveSim() { stopPlay(); if (flowRAF) cancelAnimationFrame(flowRAF); flowRAF = null; }
+function goSim() { leaveSim(); S.view = 'sim'; S.started = true; S.wstep = 0; save(); showView(); animNext = true; buildSim(); navPush(); window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }); }
+function goWizard(step = 1, keepDir) { leaveSim(); S.view = 'wizard'; S.step = step; save(); showView(); if (!keepDir) dir = step ? 1 : -1; renderWizard(); navPush(); window.scrollTo({ top: 0 }); }
+// Le bouton Précédent du navigateur revient à la vue ou à la question d'avant, au lieu de quitter le simulateur
+let popping = false;
+function navPush() {
+  if (popping) return;
+  try { const h = history.state; if (h && h.ferr && h.v === S.view && h.s === S.step) return; history.pushState({ ferr: 1, v: S.view, s: S.step }, ''); } catch (e) { }
+}
+window.addEventListener('popstate', e => {
+  const st = e.state; popping = true;
+  try {
+    if (st && st.ferr) { if (st.v === 'sim') goSim(); else if (st.v === 'cmp') goCmp(); else { dir = -1; goWizard(st.s || 0, true); } }
+    else goWizard(0);
+  } finally { popping = false; }
+});
+const goHome = () => goWizard(0);
+const keepPrefs = () => ({ lang: S.lang, theme: S.theme });
+function resumeMeta() { return [S.scen, stratLabel(S), tr('sc_age', S.age, S.deathAge), `${tr('lg_ferr')} ${money(S.ferr)}`].filter(Boolean).join(' · '); }
 
 function buildSim() {
   const el = $('#sim');
@@ -372,7 +448,7 @@ function buildSim() {
   <section class="panel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><h2>${tr('tbl_title')}</h2>
     <div class="seg" role="group"><button id="realBtn" aria-pressed="${S.real}">${tr('tbl_real')}</button><button id="nomBtn" aria-pressed="${!S.real}">${tr('tbl_nom')}</button></div></div>
     <div class="tblwrap"><table id="tbl"></table></div></section>
-  <section class="panel notes"><h3 style="color:var(--ink)">${tr('notes_title')}</h3><ul>${L().notes.map(n => `<li>${n}</li>`).join('')}</ul>
+  <section class="panel notes"><h3 style="color:var(--ink)">${tr('notes_title')}</h3><ul>${trl('notes').map(n => `<li>${n}</li>`).join('')}</ul>
     <p><a href="https://claude.ai/artifact/KXpM8v45x8zd3oTMMLeYML" target="_blank" rel="noopener" style="color:var(--accent)">${tr('research')}</a></p></section>`;
   el.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { S.strat = b.dataset.st; save(); animNext = true; el.querySelectorAll('[data-st]').forEach(o => o.setAttribute('aria-pressed', String(o === b))); refresh(); });
   bindFields($('#adjust'), () => { refreshSoon(); });
@@ -390,16 +466,16 @@ function renderStratCtl() {
   let h = '';
   if (S.strat === 'lump') h = `<div class="field"><label for="lumpR">${tr('ctl_lump', S.lumpYears)}</label><div class="numrow"><input type="range" id="lumpR" min="1" max="5" step="1" value="${S.lumpYears}"></div></div>`;
   if (S.strat === 'target') {
-    const ticks = [[54345, '54 345'], [70000, '70 000'], [P.clawThr, '95 323'], [117045, '117 045'], [155320, '155 320']];
+    const ticks = [54345, 70000, P.clawThr, 117045, Math.round(fullClaw(S.age))].map(v => [v, kmoney(v)]);
     const p = v => (v - 20000) / (250000 - 20000) * 100;
-    h = `<div class="field"><label for="tgtR">${tr('ctl_target')} : <span class="num" id="tgtV">${money(S.target)}</span></label><div class="numrow"><input type="range" id="tgtR" min="20000" max="250000" step="1000" value="${S.target}"></div>
-      <div class="ticks">${ticks.map(([v, l]) => `<button data-tv="${v}" style="left:${p(v)}%">${l}</button>`).join('')}</div></div>`;
+    h = `<div class="field"><label for="tgtR">${tr('ctl_target')}${tr('sep')}<span class="num" id="tgtV">${money(S.target)}</span></label><div class="numrow"><input type="range" id="tgtR" min="20000" max="250000" step="1000" value="${S.target}"></div>
+      <div class="ticks">${ticks.map(([v, l], i) => `<button data-tv="${v}" class="${i % 2 ? 'lo' : ''}" style="left:${p(v)}%" aria-label="${esc(money(v))}">${l}</button>`).join('')}</div></div>`;
   }
-  if (S.strat === 'fixed') h = `<div class="field"><label for="fixR">${tr('ctl_fixed')} : <span class="num" id="fixV">${money(S.fixed)}</span></label><div class="numrow"><input type="range" id="fixR" min="0" max="500000" step="1000" value="${S.fixed}"></div></div>`;
+  if (S.strat === 'fixed') h = `<div class="field"><label for="fixR">${tr('ctl_fixed')}${tr('sep')}<span class="num" id="fixV">${money(S.fixed)}</span></label><div class="numrow"><input type="range" id="fixR" min="0" max="500000" step="1000" value="${S.fixed}"></div></div>`;
   if (S.strat === 'best') h = `<p>${BEST.useMin ? tr('best_min') : tr('best_t', money(BEST.T))}</p>`;
   c.innerHTML = h;
   const lr = $('#lumpR'); if (lr) lr.oninput = () => { S.lumpYears = +lr.value; c.querySelector('label').textContent = tr('ctl_lump', S.lumpYears); save(); refreshSoon(); };
-  const tg = $('#tgtR'); if (tg) { tg.oninput = () => { S.target = +tg.value; $('#tgtV').textContent = money(S.target); save(); refreshSoon(); }; c.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { S.target = +b.dataset.tv; tg.value = S.target; $('#tgtV').textContent = money(S.target); save(); animNext = true; refresh(); }); }
+  const tg = $('#tgtR'); if (tg) { tg.oninput = () => { S.target = +tg.value; S.tnom = false; $('#tgtV').textContent = money(S.target); save(); refreshSoon(); }; c.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { S.target = +b.dataset.tv; S.tnom = false; tg.value = S.target; $('#tgtV').textContent = money(S.target); save(); animNext = true; refresh(); }); }
   const fx = $('#fixR'); if (fx) fx.oninput = () => { S.fixed = +fx.value; $('#fixV').textContent = money(S.fixed); save(); refreshSoon(); };
 }
 function refresh() {
@@ -410,25 +486,26 @@ function refresh() {
   $('#hlLead').textContent = tr('hl_lead', S.deathAge);
   tween($('#hlBig'), R.estateReal, money, 900);
   const d = R.estateReal - min.estateReal, dEl = $('#hlDelta');
-  if (S.strat === 'min' || Math.abs(d) < 1) { dEl.textContent = tr('same_min'); dEl.className = 'delta'; }
+  if (S.strat === 'min' || Math.abs(d) < 1) { dEl.textContent = tr(S.strat === 'min' ? 'same_min' : 'tie_min'); dEl.className = 'delta'; }
   else { dEl.textContent = tr('vs_min', (d > 0 ? '+' : '−') + money(Math.abs(d))); dEl.className = 'delta ' + (d > 0 ? 'pos' : 'neg'); }
   tween($('#tTax'), tot.tax, money); tween($('#tClaw'), tot.claw, money); tween($('#tDent'), tot.dental, money); tween($('#tGis'), tot.gis, money);
   renderCmp(); renderYear(); renderCharts(); renderTable();
   animNext = false;
 }
+// Couleurs : vert = stratégie choisie, orangé = au moins 10 % de moins que la meilleure, gris = les autres
+const isBadCmp = (v, bestV) => v < bestV - Math.abs(bestV) * .1;
 function renderCmp() {
   const max = Math.max(1, ...CMP.map(c => c.r.estateReal));
   const bestV = Math.max(...CMP.map(c => c.r.estateReal));
-  const cur = R;
   const box = $('#cmp');
-  const bestKey = (CMP.find(c => Math.abs(c.r.estateReal - bestV) < 1) || {}).key;
   const html = CMP.map(c => {
-    const sel = c.r === cur || (c.key === 'min' && S.strat === 'min') || (c.key === 'best' && S.strat === 'best');
+    const sel = c.key === SELKEY;
     const w = Math.max(2, c.r.estateReal / max * 100);
-    const bad = c.r.estateReal < CMP[0].r.estateReal * .9;
-    return `<button class="cmp-row ${sel ? 'sel' : ''} ${bad && !sel ? 'bad' : ''}" data-ck2="${c.key}"><span class="lbl">${tr(c.l)}${c.key === bestKey ? ` <span class="pill">${tr('best')}</span>` : ''}</span>
+    const bad = !sel && isBadCmp(c.r.estateReal, bestV);
+    return `<button class="cmp-row ${sel ? 'sel' : ''} ${bad ? 'bad' : ''}" data-ck2="${c.key}" aria-pressed="${sel}"><span class="lbl">${tr(c.l)}${Math.abs(c.r.estateReal - bestV) < 1 ? ` <span class="pill">${tr('best')}</span>` : ''}</span>
       <span class="cmp-track"><span class="cmp-fill" style="width:${animNext ? 0 : w}%" data-w="${w}"><span>${money(c.r.estateReal)}</span></span></span></button>`;
-  }).join('');
+  }).join('') + `<div class="legend cmp-key"><span><i class="k-sel"></i>${tr('k_sel')}</span><span><i class="k-other"></i>${tr('k_other')}</span><span><i class="k-bad"></i>${tr('k_bad')}</span></div>
+    <p class="small muted">${tr('k_tie')}</p>`;
   box.innerHTML = html;
   requestAnimationFrame(() => requestAnimationFrame(() => box.querySelectorAll('.cmp-fill').forEach(f => f.style.width = f.dataset.w + '%')));
   box.querySelectorAll('[data-ck2]').forEach(b => b.onclick = () => {
@@ -436,11 +513,12 @@ function renderCmp() {
     c.set && c.set(); S.strat = c.st; save(); animNext = true;
     $('#strats').querySelectorAll('[data-st]').forEach(o => o.setAttribute('aria-pressed', String(o.dataset.st === S.strat)));
     $('#stratCtl').dataset.for = ''; refresh();
+    const f = $(`#cmp [data-ck2="${c.key}"]`); if (f) f.focus({ preventScroll: true });
   });
 }
 
 /* flux animé */
-const FN = { ferr: [20, 30, 160, 70], other: [20, 125, 160, 70], draw: [20, 220, 160, 70], mid: [300, 110, 160, 100], tax: [600, 20, 140, 70], spend: [600, 125, 140, 70], save: [600, 230, 140, 70] };
+const FN = { ferr: [20, 30, 160, 70], other: [20, 125, 160, 70], draw: [20, 220, 160, 70], mid: [300, 110, 160, 100], tax: [580, 20, 172, 70], spend: [580, 125, 172, 70], save: [580, 230, 172, 70] };
 let flowLinks = [], particles = [], flowRAF = null;
 function buildFlow() {
   const svg = $('#flow');
@@ -515,17 +593,18 @@ function chainRows(y) {
   row(tr('ch_F', y.year), m(y.Fstart));
   row(tr('ch_min', y.age, pct(y.minPct)), m(y.minW), tr('ch_minf', m(y.Fstart), pct(y.minPct), m(y.minW)));
   if (S.type === 'frv') row(tr('ch_frv'), m(y.maxW), pct(y.maxPct));
-  row(tr('ch_w'), m(y.w), y.extraW > 1 ? `${tr('ch_extra')} : ${m(y.extraW)}` : '', 'ok');
+  row(tr('ch_w'), m(y.w), y.extraW > 1 ? `${tr('ch_extra')}${tr('sep')}${m(y.extraW)}` : '', 'ok');
   row(tr('ch_other'), m(h.base.rente + h.base.other));
   if (h.oas) row(tr('ch_oas'), m(h.oas));
   if (h.gis > 1) row(tr('ch_gis'), m(h.gis));
-  if (y.interest + y.div + y.cgReal > 1) row(tr('ch_inv'), m(y.interest + y.div + y.cgReal * .5), tr('ch_invf', m(y.interest), m(y.div), m(y.cgReal)));
+  if (y.interest + y.div + y.cgReal > 1) row(tr('ch_inv'), m(y.interest + y.div * (1 + P.divGross) + y.cgReal * .5), tr('ch_invf', m(y.interest), m(y.div), m(y.cgReal)));
+  if (h.tb) { row(tr('ch_sinc'), m(S.sInc * y.k)); if (h.sOas) row(tr('ch_soas'), m(h.sOas)); if (h.sGis > 1) row(tr('ch_sgis'), m(h.sGis)); }
   row(tr('ch_net'), m(ta.netBefore), h.amt > 1 ? tr('ch_split', m(h.amt)) : '');
   const thr = P.clawThr * y.k;
   if (ta.claw > 0) row(tr('ch_claw'), '−' + m(ta.claw), tr('ch_clawf', m(ta.netBefore), m(thr)), 'hl');
   else if (h.oas) row(tr('ch_claw'), m(0), tr('ch_clawn', m(thr)));
   row(tr('ch_fed'), '−' + m(ta.fed), tr('ch_fedf', m(ta.fedBasic)));
-  row(tr('ch_qc'), '−' + m(ta.qc), `${m(ta.qcBasic)} ${tr('ch_qcf')}`);
+  row(tr('ch_qc'), '−' + m(ta.qc), `${m(ta.qcBasic)} ${tr(S.couple ? 'ch_qcf2' : 'ch_qcf')}`);
   row(tr('ch_misc'), (ta.ramq - ta.sa >= 0 ? '−' : '+') + m(Math.abs(ta.ramq - ta.sa)));
   if (h.tb) row(tr('ch_spouse'), '−' + m(h.tb.fed + h.tb.qc + h.tb.claw + h.tb.ramq - h.tb.sa));
   const st = S.dentalIns ? tr('dent_ins') : h.copay === 0 ? tr('dent_free') : h.copay === .4 ? tr('dent_40') : h.copay === .6 ? tr('dent_60') : tr('dent_none');
@@ -548,15 +627,15 @@ function renderDollar(y, v) {
   const tot = segs.reduce((a, s) => a + s[1], 0) || 1;
   const box = $('#dollar');
   if (box.children.length !== segs.length) box.innerHTML = segs.map(s => `<div style="background:${s[2]};flex-grow:0"></div>`).join('');
-  [...box.children].forEach((c, i) => { c.style.flexGrow = segs[i][1] / tot; c.title = `${tr(segs[i][0])} : ${money(D(segs[i][1], y))}`; });
-  $('#dollarLg').innerHTML = segs.map(s => `<span><i style="background:${s[2]}"></i>${tr(s[0])} <b class="num">${Math.round(s[1] / tot * 100)} %</b></span>`).join('');
+  [...box.children].forEach((c, i) => { c.style.flexGrow = segs[i][1] / tot; c.title = `${tr(segs[i][0])}${tr('sep')}${money(D(segs[i][1], y))}`; });
+  $('#dollarLg').innerHTML = segs.map(s => `<span><i style="background:${s[2]}"></i>${tr(s[0])} <b class="num">${pct(s[1] / tot, 0)}</b></span>`).join('');
 }
 function renderCharts() {
   const ys = R.years, n = ys.length;
   // revenu net
   const W = 520, H = 260, pl = 50, pr = 10, pt = 18, pb = 26;
   const inc = ys.map(y => y.h.ta.netBefore / y.k);
-  const full = S.age >= 75 ? 161320 : 155320;
+  const full = fullClaw(S.age);
   // une année exceptionnelle (ex. tout sortir) ne doit pas écraser l'échelle
   const sorted = [...inc].sort((a, b) => b - a);
   const typical = sorted.length > 1 ? sorted[1] : sorted[0];
@@ -572,11 +651,11 @@ function renderCharts() {
   ys.forEach((y, i) => {
     const v = inc[i], x = pl + i * bw + bw * .15, w = bw * .7;
     const col = v > full ? 'var(--claw)' : v > P.clawThr ? 'var(--tax)' : 'var(--ferr)';
-    g += `<rect class="b" data-i="${i}" x="${x}" y="${sy(v)}" width="${w}" height="${Math.max(0, sy(0) - sy(v))}" fill="${col}" rx="1.5" style="animation-delay:${i * 30}ms"><title>${y.year} : ${money(v)}</title></rect>`;
+    g += `<rect class="b" data-i="${i}" x="${x}" y="${sy(v)}" width="${w}" height="${Math.max(0, sy(0) - sy(v))}" fill="${col}" rx="1.5" style="animation-delay:${i * 30}ms"><title>${y.year}${tr('sep')}${money(v)}</title></rect>`;
     if (v > top) {
       const yb = pt + 10;
       g += `<path d="M${x - 2},${yb + 4} l${w / 4 + 1},-5 l${w / 4},5 l${w / 4},-5 l${w / 4 + 1},5" stroke="var(--surface)" stroke-width="3" fill="none"/>`;
-      g += `<text x="${Math.min(x + w + 4, W - pr - 2)}" y="${pt + 4}" text-anchor="${x + w + 60 > W ? 'end' : 'start'}" style="fill:var(--ink);font-weight:500">${y.age} : ${money(v)}</text>`;
+      g += `<text x="${Math.min(x + w + 4, W - pr - 2)}" y="${pt + 4}" text-anchor="${x + w + 60 > W ? 'end' : 'start'}" style="fill:var(--ink);font-weight:500">${y.age}${tr('sep')}${money(v)}</text>`;
     }
   });
   const lab = Math.ceil(n / 8);
@@ -596,11 +675,11 @@ function renderCharts() {
   const sy2 = v => pt + (H2 - pt - pb2) * (1 - v / top2);
   let g2 = '';
   const st2 = niceStep(top2);
-  for (let v = 0; v <= top2; v += st2) g2 += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${sy2(v)}" y2="${sy2(v)}"/><text x="${pl - 6}" y="${sy2(v) + 4}" text-anchor="end">${v >= 1e6 ? num(v / 1e6) + 'M' : Math.round(v / 1000) + 'k'}</text>`;
+  for (let v = 0; v <= top2; v += st2) g2 += `<line class="grid" x1="${pl}" x2="${W - pr}" y1="${sy2(v)}" y2="${sy2(v)}"/><text x="${pl - 6}" y="${sy2(v) + 4}" text-anchor="end">${v >= 1e6 ? num(v / 1e6) + ' M' : Math.round(v / 1000) + ' k'}</text>`;
   ys.forEach((y, i) => {
     const x = pl + i * bw + bw * .15; let base = 0;
     for (const [val, col] of [[y.Fend / y.k, 'var(--ferr)'], [y.Bend / y.k, 'var(--nr)'], [y.Tend / y.k, 'var(--tfsa)']]) {
-      if (val > 0) g2 += `<rect class="b" data-i="${i}" x="${x}" y="${sy2(base + val)}" width="${bw * .7}" height="${Math.max(0, sy2(base) - sy2(base + val))}" fill="${col}" style="animation-delay:${i * 30}ms"><title>${y.year} : ${money(val)}</title></rect>`;
+      if (val > 0) g2 += `<rect class="b" data-i="${i}" x="${x}" y="${sy2(base + val)}" width="${bw * .7}" height="${Math.max(0, sy2(base) - sy2(base + val))}" fill="${col}" style="animation-delay:${i * 30}ms"><title>${y.year}${tr('sep')}${money(val)}</title></rect>`;
       base += val;
     }
   });
@@ -611,10 +690,10 @@ function renderCharts() {
 }
 function niceStep(top) { const raw = top / 4, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p; return (m < 1.5 ? 1 : m < 3.5 ? 2.5 : m < 7.5 ? 5 : 10) * p; }
 function renderTable() {
-  const th = L().th;
+  const th = L().th.map((t, i) => S.couple && i >= 6 && i <= 9 ? `${t} ${tr('hh')}` : t);
   const rows = R.years.map((y, i) => {
     const h = y.h, m = x => money(D(x, y)), sp = h.tb;
-    return `<tr data-i="${i}" class="${i === S.sel ? 'cur' : ''}"><td>${y.year}</td><td>${y.age}</td><td>${m(y.Fstart)}</td><td>${m(y.minW)}</td><td>${m(y.w)}</td><td>${m(h.ta.netBefore)}</td><td>${m(h.oas)}</td><td>${m(h.ta.claw)}</td>
+    return `<tr data-i="${i}" class="${i === S.sel ? 'cur' : ''}"><td>${y.year}</td><td>${y.age}</td><td>${m(y.Fstart)}</td><td>${m(y.minW)}</td><td>${m(y.w)}</td><td>${m(h.ta.netBefore)}</td><td>${m(h.oas + h.sOas)}</td><td>${m(h.ta.claw + (sp ? sp.claw : 0))}</td>
       <td>${m(h.ta.fed + (sp ? sp.fed : 0))}</td><td>${m(h.ta.qc + (sp ? sp.qc : 0))}</td><td>${m(h.dentalCost)}</td><td>${m(y.spend)}</td><td>${(y.surplus >= 0 ? '+' : '−') + m(Math.abs(y.surplus >= 0 ? y.surplus : y.drawB + y.drawT))}</td>
       <td>${m(y.Bend)}</td><td>${m(y.Tend)}</td><td>${m(y.Fend)}</td></tr>`;
   }).join('');
@@ -633,18 +712,27 @@ function stopPlay() { if (playing) clearInterval(playing); playing = null; const
 function applyLang() {
   document.documentElement.lang = S.lang;
   document.title = tr('brand');
-  document.querySelectorAll('[data-t]').forEach(e => e.textContent = tr(e.dataset.t));
-  applyTheme();
+  document.querySelectorAll('[data-t]').forEach(e => { if (!e.disabled) e.textContent = tr(e.dataset.t); });
+  applyTheme(); showView();
   $('#lang-fr').setAttribute('aria-pressed', String(S.lang === 'fr')); $('#lang-en').setAttribute('aria-pressed', String(S.lang === 'en'));
 }
-function isDark() { return S.theme ? S.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; }
+// Mode clair par défaut, quel que soit le réglage de l'ordinateur ; le sombre seulement si on le choisit
+function isDark() { return S.theme === 'dark'; }
 function applyTheme() {
-  if (S.theme) document.documentElement.setAttribute('data-theme', S.theme);
+  document.documentElement.setAttribute('data-theme', isDark() ? 'dark' : 'light');
   const b = $('#themeBtn'); b.textContent = isDark() ? tr('th_light') : tr('th_dark');
 }
 $('#themeBtn').onclick = () => { S.theme = isDark() ? 'light' : 'dark'; save(); applyTheme(); };
-function setLang(l) { S.lang = l; save(); applyLang(); onLangChange(); if (S.view === 'sim') { stopPlay(); flowRAF && cancelAnimationFrame(flowRAF); flowRAF = null; buildSim(); } else renderWizard(); }
+function setLang(l) { S.lang = l; save(); applyLang(); onLangChange(); if (S.view === 'sim') { leaveSim(); buildSim(); } else if (S.view === 'cmp') buildCmp(); else renderWizard(); }
 $('#lang-fr').onclick = () => setLang('fr'); $('#lang-en').onclick = () => setLang('en');
-$('#editBtn').onclick = goWizard;
-// le démarrage est appelé par session.js, qui peut d'abord charger un lien de partage
-function boot() { applyLang(); if (S.view === 'sim') goSim(); else renderWizard(); }
+$('#editBtn').onclick = () => goWizard(1);
+$('#homeBtn').onclick = goHome;
+// le démarrage est appelé par session.js, qui peut d'abord charger un lien de partage ;
+// sans lien, on arrive toujours sur l'accueil
+function boot(fromLink) {
+  if (S.started === undefined) { S.started = S.view === 'sim'; S.wstep = S.started ? 0 : S.step; }
+  if (!fromLink) { S.view = 'wizard'; S.step = 0; }
+  try { history.replaceState({ ferr: 1, v: S.view, s: S.step }, ''); } catch (e) { }
+  applyLang();
+  if (S.view === 'sim') goSim(); else if (S.view === 'cmp') goCmp(); else { save(); showView(); renderWizard(); }
+}
