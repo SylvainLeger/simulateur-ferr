@@ -13,6 +13,8 @@ Object.assign(I18N.fr, {
   link_title: 'Lien de partage', link_copied: 'Lien copié. Il contient vos chiffres : envoyez-le seulement à des personnes de confiance.',
   link_manual: 'Copiez ce lien (Ctrl+C), puis collez-le dans un courriel. Il contient vos chiffres : envoyez-le seulement à des personnes de confiance.',
   link_loaded: 'Scénario ouvert à partir du lien.', file_none: 'Le téléchargement n\'est pas disponible ici.',
+  before_link: (d) => `Avant le lien du ${d}`, kept_prev: (n) => `Scénario ouvert à partir du lien. Votre simulation précédente est gardée dans « Mes scénarios » sous « ${n} ».`,
+  store_fail: 'Ce navigateur ne permet pas d\'enregistrer : le scénario n\'a pas été gardé.', wiped_elsewhere: 'Les données ont été effacées dans un autre onglet.',
 });
 Object.assign(I18N.en, {
   autosaved: '✓ Saved automatically', save_btn: 'Save', scen_btn: 'My scenarios', share_btn: 'Share',
@@ -28,6 +30,8 @@ Object.assign(I18N.en, {
   link_title: 'Share link', link_copied: 'Link copied. It contains your numbers: only send it to people you trust.',
   link_manual: 'Copy this link (Ctrl+C), then paste it into an email. It contains your numbers: only send it to people you trust.',
   link_loaded: 'Scenario opened from the link.', file_none: 'Downloading is not available here.',
+  before_link: (d) => `Before the link of ${d}`, kept_prev: (n) => `Scenario opened from the link. Your previous simulation is kept in “My scenarios” as “${n}”.`,
+  store_fail: 'This browser does not allow saving: the scenario was not kept.', wiped_elsewhere: 'The data was cleared in another tab.',
 });
 
 const PUBLIC_URL = 'https://simulateur-ferr-bnzvmrkrfa-uk.a.run.app/';
@@ -42,9 +46,9 @@ function sanitize(o) {
     if (typeof v !== typeof d) continue;
     if (typeof v === 'number' && !Number.isFinite(v)) continue;
     if (ENUMS[k] && !ENUMS[k].includes(v)) continue;
-    out[k] = v;
+    // Un lien ou une sauvegarde ne peut pas imposer une valeur hors des bornes du formulaire
+    out[k] = typeof v === 'number' ? clamp(k, v) : v;
   }
-  if (out.deathAge !== undefined && out.age !== undefined && out.deathAge <= out.age) out.deathAge = out.age + 1;
   return out;
 }
 const snapshot = () => sanitize(S);
@@ -53,11 +57,11 @@ const validLang = l => (l === 'fr' || l === 'en') ? l : null;
 
 /* ---------- scénarios ---------- */
 function loadScen() { try { const a = JSON.parse(localStorage.getItem('ferrsim_scen') || '[]'); return Array.isArray(a) ? a.filter(x => x && typeof x.name === 'string').map(x => ({ name: x.name.slice(0, 80), savedAt: String(x.savedAt || ''), data: sanitize(x.data) })) : []; } catch (e) { return []; } }
-function storeScen(a) { try { localStorage.setItem('ferrsim_scen', JSON.stringify(a)); } catch (e) { } }
+function storeScen(a) { try { localStorage.setItem('ferrsim_scen', JSON.stringify(a)); return true; } catch (e) { return false; } }
 function stratFor(inp) {
   switch (inp.strat) {
     case 'lump': return { kind: 'lump', years: inp.lumpYears };
-    case 'target': return { kind: 'target', amount: inp.target };
+    case 'target': return { kind: 'target', amount: inp.target, nominal: inp.tnom };
     case 'fixed': return { kind: 'fixed', amount: inp.fixed };
     default: return { kind: 'min' };
   }
@@ -73,7 +77,8 @@ function stratLabel(d) {
   const x = { ...DEFAULTS, ...d };
   const base = tr('st_' + x.strat);
   if (x.strat === 'lump') return `${base} · ${tr('ctl_lump', x.lumpYears)}`;
-  if (x.strat === 'target' || x.strat === 'fixed') return `${base} · ${money(x.strat === 'target' ? x.target : x.fixed)}`;
+  if (x.strat === 'target') return `${base} · ${money(x.target)}${x.tnom ? ' ' + tr('nominal_tag') : ''}`;
+  if (x.strat === 'fixed') return `${base} · ${money(x.fixed)}`;
   return base;
 }
 const fmtDate = iso => { try { return new Intl.DateTimeFormat(loc(), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso)); } catch (e) { return ''; } };
@@ -120,10 +125,22 @@ function readHash() {
     if (!openCmpLink(o, lang)) return null;
     save(); return 'c';
   }
+  // Le travail en cours n'est jamais écrasé en silence : il est gardé comme scénario
+  const cur = snapshot(), list = loadScen();
+  keptName = '';
+  if (S.started && !sameData(cur, DEFAULTS) && !list.some(x => sameData(x.data, cur))) {
+    const d = new Intl.DateTimeFormat(lang === 'fr' ? 'fr-CA' : 'en-CA', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
+    let name = (I18N[lang].before_link)(d), i = 2; while (list.some(x => x.name === name)) name = `${(I18N[lang].before_link)(d)} (${i++})`;
+    list.push({ name, savedAt: new Date().toISOString(), data: cur });
+    if (storeScen(list)) keptName = name;
+  }
   S = { ...DEFAULTS, ...keepPrefs(), lang, ...sanitize(o), view: 'sim', sel: 0, step: 1, scen: '', started: true, cmpA: S.cmpA, cmpB: S.cmpB };
   save();
   return 's';
 }
+
+let keptName = '';
+const linkToast = h => h === 'c' ? tr('cv_loaded') : keptName ? tr('kept_prev', keptName) : tr('link_loaded');
 
 /* ---------- appliquer un jeu de données ---------- */
 function applyData(d, name) {
@@ -138,16 +155,19 @@ function rebuildView() {
 
 /* ---------- petits outils ---------- */
 let toastT = null;
+// La zone de message existe dès le départ pour que les lecteurs d'écran annoncent chaque message
+function toastEl() { let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); } return t; }
 function toast(msg) {
-  let t = $('#toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  const t = toastEl();
   t.textContent = msg; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4200);
 }
 // Bouton à deux temps : le premier clic demande confirmation, le second agit
+// L'armement est lié au bouton affiché : après un nouvel affichage, il faut de nouveau deux clics
 const armed = new Map();
 function arm(btn, key, labelKey, okKey, fn) {
-  if (armed.get(key)) { armed.delete(key); fn(); return; }
-  armed.set(key, true); btn.textContent = tr(okKey); btn.classList.add('danger');
-  setTimeout(() => { if (armed.get(key)) { armed.delete(key); btn.textContent = tr(labelKey); btn.classList.remove('danger'); } }, 3500);
+  if (armed.get(key) === btn) { armed.delete(key); fn(); return; }
+  armed.set(key, btn); btn.textContent = tr(okKey); btn.classList.add('danger');
+  setTimeout(() => { if (armed.get(key) === btn) { armed.delete(key); btn.textContent = tr(labelKey); btn.classList.remove('danger'); } }, 3500);
 }
 
 /* ---------- fenêtres : Enregistrer, Mes scénarios, lien ---------- */
@@ -181,7 +201,8 @@ function renderSave(dlg) {
   $('#svCancel').onclick = () => dlg.close();
   $('#scForm').onsubmit = e => {
     e.preventDefault(); const name = nm.value.trim(); if (!name) { nm.focus(); return; }
-    const l = loadScen().filter(x => x.name !== name); l.push({ name, savedAt: new Date().toISOString(), data: snapshot() }); storeScen(l);
+    const l = loadScen().filter(x => x.name !== name); l.push({ name, savedAt: new Date().toISOString(), data: snapshot() });
+    if (!storeScen(l)) { toast(tr('store_fail')); return; }
     S.scen = name; save(); dlg.close(); toast(tr('sc_saved', name));
   };
 }
@@ -198,7 +219,7 @@ function renderScen(dlg) {
       const x = { ...DEFAULTS, ...r.data }, act = r.name === S.scen, mod = act && !sameData(r.data, cur);
       return `<div class="scitem ${act ? 'act' : ''}">
         <div class="scmeta"><div class="scname" id="scn${i}"><b>${esc(r.name)}</b>${act ? ` <span class="pill">${tr('sc_act')}</span>` : ''}${mod ? ` <span class="pill care">${tr('sc_mod')}</span>` : ''}</div>
-          <span class="small muted">${esc(stratLabel(r.data))} · ${tr('sc_age', x.age, x.deathAge)} · FERR ${money(x.ferr)}${r.savedAt ? ` · ${tr('saved_at', fmtDate(r.savedAt))}` : ''}</span>
+          <span class="small muted">${esc(stratLabel(r.data))} · ${tr('sc_age', x.age, x.deathAge)} · ${tr('lg_ferr')} ${money(x.ferr)}${r.savedAt ? ` · ${tr('saved_at', fmtDate(r.savedAt))}` : ''}</span>
           <div class="scbar" title="${esc(tr('sc_estate', money(vals[i])))}"><span style="width:${Math.max(2, vals[i] / max * 100)}%"></span><b class="num">${money(vals[i])}</b></div></div>
         <div class="scbtns">${act && !mod ? '' : `<button class="btn" data-open="${i}">${tr('sc_open')}</button>`}<button class="btn" data-cmp="${i}">${tr('sc_cmp')}</button>
           <details class="more"><summary class="btn" aria-label="${esc(tr('sc_more'))}" title="${esc(tr('sc_more'))}">⋯</summary><div class="menu"><button data-ren="${i}">${tr('sc_ren')}</button><button class="danger" data-del="${i}">${tr('sc_del')}</button></div></details></div></div>`;
@@ -232,8 +253,16 @@ $('#saveBtn').onclick = openSave;
 $('#scenBtn').onclick = openScen;
 $('#shareBtn').onclick = () => copyLink(S.view === 'cmp' ? cmpLink() : shareLink());
 $('#sessDlg').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
-window.addEventListener('hashchange', () => { const h = readHash(); if (h) { applyLang(); rebuildView(); toast(tr(h === 'c' ? 'cv_loaded' : 'link_loaded')); } });
+window.addEventListener('hashchange', () => { const h = readHash(); if (h) { applyLang(); rebuildView(); toast(linkToast(h)); } });
+// Effacement fait dans un autre onglet : ne pas réécrire les données à la prochaine action ici
+window.addEventListener('storage', e => {
+  if (e.key !== null && !(e.key === 'ferrsim' && e.newValue === null)) return;
+  leaveSim(); S = { ...DEFAULTS, ...keepPrefs(), started: false }; showView(); renderWizard(); toast(tr('wiped_elsewhere'));
+});
 
+// Une sauvegarde abîmée ou d'une ancienne version est ramenée aux champs connus et aux bornes
+{ const clean = sanitize(S); for (const k of SAVE_KEYS) S[k] = k in clean ? clean[k] : DEFAULTS[k]; }
+toastEl();
 const fromLink = readHash();
 boot(!!fromLink);
-if (fromLink) toast(tr(fromLink === 'c' ? 'cv_loaded' : 'link_loaded'));
+if (fromLink) toast(linkToast(fromLink));

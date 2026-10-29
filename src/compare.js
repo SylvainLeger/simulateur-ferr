@@ -2,7 +2,7 @@
 Object.assign(I18N.fr, {
   cmp_btn: 'Comparer', cmp_back: 'Retour aux résultats', share_cmp: 'Partager la comparaison', cv_loaded: 'Comparaison ouverte à partir du lien.',
   cv_title: 'Comparer deux scénarios', cv_sub: 'Chaque colonne prend une situation et une stratégie. Montants en dollars de 2026.',
-  cv_a: 'Scénario A', cv_b: 'Scénario B', cv_sep: ' :', cv_src: 'Situation', cv_cur: 'Situation actuelle', cv_link: (n) => `${n} (reçu par lien)`, cv_strat: 'Stratégie',
+  cv_a: 'Scénario A', cv_b: 'Scénario B',  cv_src: 'Situation', cv_cur: 'Situation actuelle', cv_link: (n) => `${n} (reçu par lien)`, cv_strat: 'Stratégie',
   cv_diff: 'Ce qui diffère', cv_same: 'Les deux colonnes utilisent les mêmes réponses et la même stratégie. Changez la stratégie ou la situation d\'une colonne.',
   cv_m_estate: 'Patrimoine laissé après impôt au décès', cv_gap: 'Écart B − A', cv_legend: 'Vert : avantage pour B. Orangé : désavantage pour B.',
   cv_chart: 'Avoir total (FERR + placements), année par année', cv_chart_sub: 'En dollars de 2026, avant l\'impôt au décès.',
@@ -11,7 +11,7 @@ Object.assign(I18N.fr, {
 Object.assign(I18N.en, {
   cmp_btn: 'Compare', cmp_back: 'Back to results', share_cmp: 'Share the comparison', cv_loaded: 'Comparison opened from the link.',
   cv_title: 'Compare two scenarios', cv_sub: 'Each column takes a situation and a strategy. Amounts in 2026 dollars.',
-  cv_a: 'Scenario A', cv_b: 'Scenario B', cv_sep: ':', cv_src: 'Situation', cv_cur: 'Current situation', cv_link: (n) => `${n} (from a link)`, cv_strat: 'Strategy',
+  cv_a: 'Scenario A', cv_b: 'Scenario B',  cv_src: 'Situation', cv_cur: 'Current situation', cv_link: (n) => `${n} (from a link)`, cv_strat: 'Strategy',
   cv_diff: 'What differs', cv_same: 'Both columns use the same answers and the same strategy. Change the strategy or the situation of one column.',
   cv_m_estate: 'Estate left after tax at death', cv_gap: 'Gap B − A', cv_legend: 'Green: better for B. Orange: worse for B.',
   cv_chart: 'Total assets (RRIF + investments), year by year', cv_chart_sub: 'In 2026 dollars, before tax at death.',
@@ -32,7 +32,7 @@ function fmtField(f, v) {
   switch (f) {
     case 'y': return `${v} ${tr('years')}`;
     case '$': return money(v);
-    case '%': return `${num(v)} %`;
+    case '%': return pct(v / 100, Number.isInteger(v) ? 0 : 2);
     case 'b': return tr(v ? 'yes' : 'no');
     case 'type': return tr(v === 'frv' ? 'o_frv' : 'o_ferr');
     case 'house': return tr(v ? 'o_couple' : 'o_alone');
@@ -61,9 +61,9 @@ function colBase(c) {
   return snapshot();
 }
 const colData = c => ({ ...DEFAULTS, ...colBase(c), strat: c.strat });
-function colTitle(c) {
+function colTitle(c, key) {
   if (c.src === 'sc' && loadScen().some(x => x.name === c.name)) return c.name;
-  if (c.src === 'data') return tr('cv_link', c.name || '—');
+  if (c.src === 'data') return tr('cv_link', c.name || tr(key === 'b' ? 'cv_b' : 'cv_a'));
   return tr('cv_cur');
 }
 function ensureCols() {
@@ -72,7 +72,7 @@ function ensureCols() {
 }
 
 /* ---------- entrer dans la comparaison ---------- */
-function goCmp() { leaveSim(); S.view = 'cmp'; S.started = true; ensureCols(); save(); showView(); buildCmp(); window.scrollTo({ top: 0 }); }
+function goCmp() { leaveSim(); S.view = 'cmp'; S.started = true; ensureCols(); save(); showView(); buildCmp(); navPush(); window.scrollTo({ top: 0 }); }
 // Depuis les résultats : A = la situation affichée ; B garde son choix précédent s'il diffère encore de A
 function startCmp() {
   const A = { src: 'cur', strat: S.strat }, B = validCol(S.cmpB);
@@ -97,8 +97,9 @@ function cmpLink() {
 }
 function openCmpLink(o, lang) {
   if (!o.a || !o.b || typeof o.a !== 'object' || typeof o.b !== 'object') return false;
-  const col = (p, def) => { const d = { ...DEFAULTS, ...sanitize(p.d) }; return { src: 'data', name: typeof p.n === 'string' && p.n.trim() ? p.n.trim().slice(0, 80) : def, data: d, strat: d.strat }; };
-  S = { ...S, lang, view: 'cmp', started: true, cmpA: col(o.a, I18N[lang].cv_a), cmpB: col(o.b, I18N[lang].cv_b) };
+  // Sans nom, la colonne s'appelle « Scénario A » ou « B » dans la langue affichée
+  const col = p => { const d = { ...DEFAULTS, ...sanitize(p.d) }; return { src: 'data', name: typeof p.n === 'string' ? p.n.trim().slice(0, 80) : '', data: d, strat: d.strat }; };
+  S = { ...S, lang, view: 'cmp', started: true, cmpA: col(o.a), cmpB: col(o.b) };
   return true;
 }
 
@@ -107,7 +108,7 @@ function colHTML(key, c) {
   const list = loadScen();
   const opts = [`<option value="cur" ${c.src === 'cur' ? 'selected' : ''}>${esc(tr('cv_cur'))}</option>`,
     ...list.map((x, i) => `<option value="sc${i}" ${c.src === 'sc' && c.name === x.name ? 'selected' : ''}>${esc(x.name)}</option>`),
-    ...(c.src === 'data' ? [`<option value="data" selected>${esc(colTitle(c))}</option>`] : [])];
+    ...(c.src === 'data' ? [`<option value="data" selected>${esc(colTitle(c, key))}</option>`] : [])];
   return `<div class="cv-col ${key}"><span class="eyebrow" style="color:var(--ca)">${tr(key === 'a' ? 'cv_a' : 'cv_b')}</span>
     <label class="small muted" for="cvSrc_${key}">${tr('cv_src')}</label><select id="cvSrc_${key}" data-col="${key}">${opts.join('')}</select>
     <span class="small muted">${tr('cv_strat')}</span>
@@ -141,6 +142,7 @@ function cmpChart(ra, rb) {
     + (p.length ? `<circle cx="${sx(p[p.length - 1][0])}" cy="${sy(p[p.length - 1][1])}" r="4" fill="${col}"/>` : '');
   return g + line(A, 'var(--ferr)', false) + line(B, 'var(--nr)', true);
 }
+let cmpFocus = null;
 function buildCmp() {
   ensureCols();
   const A = S.cmpA, B = S.cmpB, da = colData(A), db = colData(B);
@@ -163,7 +165,7 @@ function buildCmp() {
   $('#cmpv').innerHTML = `
   <section class="panel"><div><h2>${tr('cv_title')}</h2><p class="small muted">${tr('cv_sub')}</p></div>
     <div class="cv-cols">${colHTML('a', A)}${colHTML('b', B)}</div>
-    <div class="cv-diff"><h3>${tr('cv_diff')}</h3>${diffs.length ? `<ul>${diffs.map(([l, x, y]) => `<li><span class="muted">${esc(l)}${tr('cv_sep')}</span> ${esc(x)} <span class="muted">→</span> ${esc(y)}</li>`).join('')}</ul>` : `<p class="small muted">${tr('cv_same')}</p>`}</div>
+    <div class="cv-diff"><h3>${tr('cv_diff')}</h3>${diffs.length ? `<ul>${diffs.map(([l, x, y]) => `<li><span class="muted">${esc(l)}${tr('sep')}</span> ${esc(x)} <span class="muted">→</span> ${esc(y)}</li>`).join('')}</ul>` : `<p class="small muted">${tr('cv_same')}</p>`}</div>
   </section>
   <section class="panel"><div class="cv-m">
     <div class="cv-r hd"><span class="l"></span><span class="v">A</span><span class="v">B</span><span class="v">${tr('cv_gap')}</span></div>
@@ -171,7 +173,7 @@ function buildCmp() {
   </div><p class="small muted">${tr('cv_legend')}</p></section>
   <section class="panel"><div><h3>${tr('cv_chart')}</h3><p class="small muted">${tr('cv_chart_sub')}</p></div>
     <svg class="chart" style="max-width:760px" viewBox="0 0 640 280" role="img" aria-label="${esc(tr('cv_chart'))}">${cmpChart(ra, rb)}</svg>
-    <div class="legend cv-lg"><span><i style="background:var(--ferr)"></i>A · ${esc(colTitle(A))} · ${esc(stratLabel(da))}</span><span><i class="dash"></i>B · ${esc(colTitle(B))} · ${esc(stratLabel(db))}</span></div></section>
+    <div class="legend cv-lg"><span><i style="background:var(--ferr)"></i>A · ${esc(colTitle(A, 'a'))} · ${esc(stratLabel(da))}</span><span><i class="dash"></i>B · ${esc(colTitle(B, 'b'))} · ${esc(stratLabel(db))}</span></div></section>
   <section class="panel"><details><summary>${tr('cv_tbl')}</summary>
     <div class="tblwrap" style="margin-top:12px"><table><thead><tr>${L().cv_th.map(t => `<th>${t}</th>`).join('')}</tr></thead><tbody>
     ${ages.map(a => { const x = ya[a], y = yb[a]; const g = x && y ? tot(y) / y.k - tot(x) / x.k : null;
@@ -183,9 +185,11 @@ function buildCmp() {
     const key = sel.dataset.col === 'a' ? 'cmpA' : 'cmpB', v = sel.value;
     if (v === 'cur') S[key] = { src: 'cur', strat: S.strat };
     else if (v.startsWith('sc')) { const sc = loadScen()[+v.slice(2)]; if (sc) S[key] = { src: 'sc', name: sc.name, strat: { ...DEFAULTS, ...sc.data }.strat }; }
-    save(); buildCmp();
+    save(); cmpFocus = '#' + sel.id; buildCmp();
   });
   el.querySelectorAll('[data-cst]').forEach(b => b.onclick = () => {
-    const key = b.dataset.col === 'a' ? 'cmpA' : 'cmpB'; S[key] = { ...S[key], strat: b.dataset.cst }; save(); buildCmp();
+    const key = b.dataset.col === 'a' ? 'cmpA' : 'cmpB'; S[key] = { ...S[key], strat: b.dataset.cst }; save();
+    cmpFocus = `[data-col="${b.dataset.col}"][data-cst="${b.dataset.cst}"]`; buildCmp();
   });
+  if (cmpFocus) { const f = el.querySelector(cmpFocus); cmpFocus = null; if (f) f.focus({ preventScroll: true }); }
 }

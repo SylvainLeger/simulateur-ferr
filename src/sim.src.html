@@ -66,7 +66,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 .numbox{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:0 10px;flex:none}
 .numbox input{width:120px;border:0;background:none;padding:8px 0;font:500 1rem var(--mono);color:var(--ink);text-align:right}
 .numbox input:focus{outline:none}
-.numbox:focus-within{border-color:var(--accent)}
+.numbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
 .numbox span{color:var(--muted);font-family:var(--mono);padding-left:6px}
 .choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .choice{border:1.5px solid var(--line);border-radius:10px;padding:14px;text-align:left;background:var(--bg);display:grid;gap:4px;transition:border-color .2s,background .2s,transform .2s}
@@ -82,11 +82,13 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 .welcome ul{margin:0;padding-left:1.1em;display:grid;gap:6px;max-width:62ch}
 
 /* jauge de revenu */
-.gauge{position:relative;height:56px;margin-top:4px}
-.gauge .track{position:absolute;left:0;right:0;top:22px;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--accent-soft) 0 52%,var(--warn-soft) 52% 100%)}
-.gauge .mark{position:absolute;top:14px;width:1px;height:26px;background:var(--muted)}
+.gauge{position:relative;height:78px;margin-top:4px}
+.gauge .track{position:absolute;left:0;right:0;top:32px;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--accent-soft) 0 52%,var(--warn-soft) 52% 100%)}
+.gauge .mark{position:absolute;top:24px;width:1px;height:26px;background:var(--muted)}
+.gauge .mark.up span{top:-22px}
+.gauge .mark.end span{transform:translateX(calc(-100% + 6px));text-align:right;white-space:normal;width:max-content;max-width:min(20em,42vw)}
 .gauge .mark span{position:absolute;top:28px;transform:translateX(-50%);font:400 .68rem var(--mono);color:var(--muted);white-space:nowrap}
-.gauge .pin{position:absolute;top:10px;width:16px;height:34px;margin-left:-8px;transition:left .6s cubic-bezier(.2,.8,.2,1)}
+.gauge .pin{position:absolute;top:20px;width:16px;height:34px;margin-left:-8px;transition:left .6s cubic-bezier(.2,.8,.2,1)}
 .gauge .pin i{display:block;width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--surface);box-shadow:0 0 0 1px var(--accent);margin-top:7px}
 
 /* simulation */
@@ -104,19 +106,23 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 .chip{border:1.5px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 14px;font-size:.9rem;transition:all .2s}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .stratctl{display:grid;gap:8px}
-.ticks{position:relative;height:18px}
-.ticks button{position:absolute;transform:translateX(-50%);border:0;background:none;font:400 .68rem var(--mono);color:var(--muted);padding:0;white-space:nowrap}
+.ticks{position:relative;height:34px}
+.ticks button.lo{top:16px}
+.ticks button{position:absolute;top:0;transform:translateX(-50%);border:0;background:none;font:400 .68rem var(--mono);color:var(--muted);padding:0;white-space:nowrap}
 .ticks button:hover{color:var(--accent)}
 .cmp{display:grid;gap:8px}
 .cmp-row{display:grid;grid-template-columns:minmax(150px,230px) 1fr;gap:12px;align-items:center;border:0;background:none;text-align:left;padding:2px 0}
 .cmp-row .lbl{font-size:.88rem;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .pill{font:500 .65rem var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent)}
 .cmp-track{height:28px;background:var(--sunk);border-radius:5px;position:relative;overflow:hidden}
-.cmp-fill{height:100%;border-radius:5px;background:var(--spend);transition:width .8s cubic-bezier(.2,.8,.2,1);display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
-.cmp-fill span{font:500 .78rem var(--mono);color:#fff;white-space:nowrap}
+.cmp-fill{height:100%;border-radius:5px;background:color-mix(in srgb, var(--spend) 38%, var(--surface));transition:width .8s cubic-bezier(.2,.8,.2,1);display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
+.cmp-fill span{font:500 .78rem var(--mono);color:var(--ink);white-space:nowrap}
 .cmp-row.sel .cmp-fill{background:var(--accent)}
 .cmp-row.sel .cmp-fill span{color:var(--accent-ink)}
 .cmp-row.bad .cmp-fill{background:var(--warn)}
+.cmp-row.bad .cmp-fill span{color:var(--accent-ink)}
+.cmp-key i{width:14px;height:10px}
+.cmp-key .k-sel{background:var(--accent)} .cmp-key .k-other{background:color-mix(in srgb, var(--spend) 38%, var(--surface));border:1px solid var(--line)} .cmp-key .k-bad{background:var(--warn)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 .yearbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .yearbar input{flex:1 1 200px;min-width:0;accent-color:var(--accent)}
@@ -232,11 +238,11 @@ details summary{cursor:pointer;font-weight:600}
 .cv-r .l{color:var(--muted)} .cv-r.big .l{color:var(--ink)}
 .gpos{color:var(--good)} .gneg{color:var(--warn)}
 .cv-lg i.dash{background:none;border-top:2px dashed var(--nr);height:0;width:16px;border-radius:0}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10;max-width:calc(100vw - 32px)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;text-align:center;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10;max-width:calc(100vw - 32px)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:860px){.wiz{grid-template-columns:1fr}.rail{position:static;grid-auto-flow:column;overflow-x:auto}.rail button span.t{display:none}.headline,.two{grid-template-columns:1fr}}
 @media (max-width:620px){.scitem,.resume{grid-template-columns:1fr}.scbtns{justify-content:flex-start}.cv-cols{grid-template-columns:1fr}.saved{display:none}}
-@media (max-width:560px){.cv-r{grid-template-columns:repeat(3,minmax(0,1fr))}.cv-r .l{grid-column:1/-1}.cv-r.hd .l{display:none}}
+@media (max-width:560px){.cv-r{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cv-r .l{grid-column:1/-1}.cv-r.hd .l{display:none}.cv-r .v,.cv-r.big .v{font-size:.82rem;white-space:normal;overflow-wrap:anywhere}}
 @media (max-width:480px){.card{padding:18px}.dlg-in{padding:16px}.cmp-row{grid-template-columns:1fr}.tiles{grid-template-columns:1fr 1fr}.numbox input{width:96px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -267,7 +273,7 @@ details summary{cursor:pointer;font-weight:600}
   </nav>
 
   <main id="wizard" class="wiz">
-    <nav class="rail" id="rail" aria-label="Étapes"></nav>
+    <nav class="rail" id="rail"></nav>
     <div class="card" id="stepCard"></div>
   </main>
 

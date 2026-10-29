@@ -57,7 +57,8 @@ function personTax(o, k) {
 }
 
 // Ménage pour une année : retrait w, gain en capital imposable cg (50 %), fractionnement optimisé
-function household(inp, y, w, cgTaxable, forceSplit) {
+// splitAmt : montant fractionné imposé (sinon la meilleure part est cherchée)
+function household(inp, y, w, cgTaxable, splitAmt) {
   const k = y.k, age = y.age;
   const oas = inp.oas ? oasFor(age, k) : 0;
   const sAge = y.sAge;
@@ -77,10 +78,10 @@ function household(inp, y, w, cgTaxable, forceSplit) {
   base.gis = gis;
   const spouse = inp.couple ? { age: sAge, ferr: 0, rente: 0, other: inp.sInc * k, interest: 0, div: 0, cg: 0, oas: sOas, gis: sGis, alone: false } : null;
   const eligible = inp.couple && inp.split && age >= 65 ? base.rente + w : 0;
-  const fracs = forceSplit != null ? [forceSplit] : (eligible > 0 ? [0, .1, .2, .3, .4, .5] : [0]);
+  const amts = splitAmt != null ? [Math.min(splitAmt, eligible * .5)] : (eligible > 0 ? [0, .1, .2, .3, .4, .5].map(f => eligible * f) : [0]);
   let best = null;
-  for (const f of fracs) {
-    const amt = eligible * f;
+  for (const amt of amts) {
+    const f = eligible > 0 ? amt / eligible : 0;
     const a = { ...base, splitOut: amt }, b = spouse ? { ...spouse, splitIn: amt } : null;
     const ta0 = personTax(a, k), tb0 = b ? personTax(b, k) : null;
     const famNet = ta0.net + (tb0 ? tb0.net : 0);
@@ -105,7 +106,8 @@ function strategyWithdraw(s, ctx) {
     case 'target': {
       const oas = inp.oas ? oasFor(y.age, k) : 0;
       const other = (inp.rente + inp.rrq + inp.other) * k + oas + y.interest + y.div * (1 + P.divGross);
-      return s.amount * k - other;
+      // nominal : montant non indexé (pour rester sous un seuil qui ne suit pas l'inflation)
+      return (s.nominal ? s.amount : s.amount * k) - other;
     }
     case 'fixed': return s.amount * k;
   }
@@ -179,8 +181,9 @@ function simulate(inp, s) {
   const last = years[years.length - 1];
   const unreal = Math.max(0, B - acb);
   const baseCg = last.cgReal * .5;
-  const h0 = household(inp, last, last.w, baseCg, last.h.f);
-  const h1 = household(inp, last, last.w + F, baseCg + unreal * .5, last.h.f);
+  // Le solde du FERR au décès n'est pas fractionnable : on garde le montant fractionné de l'année
+  const h0 = household(inp, last, last.w, baseCg, last.h.amt);
+  const h1 = household(inp, last, last.w + F, baseCg + unreal * .5, last.h.amt);
   const deathTax = F > 0 || unreal > 0 ? Math.max(0, h1.total - h0.total) : 0;
   const kEnd = last.k;
   const estate = B + T + F - deathTax;
@@ -192,7 +195,9 @@ function simulate(inp, s) {
 function marginalRate(inp, y) {
   const a = household(inp, y, y.w, y.cgReal * .5);
   const b = household(inp, y, y.w + 1000, y.cgReal * .5);
-  return ((b.total + b.dentalCost) - (a.total + a.dentalCost)) / 1000;
+  // Le SRG perdu compte aussi : c'est un revenu qui disparaît
+  const cost = h => h.total + h.dentalCost - h.gis - h.sGis;
+  return (cost(b) - cost(a)) / 1000;
 }
 
 function bestTarget(inp) {

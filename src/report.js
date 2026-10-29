@@ -30,7 +30,9 @@ function loadPdfLib() {
   if (window.pdfMake && window.pdfMake.vfs) return Promise.resolve();
   if (pdfReady) return pdfReady;
   const load = src => new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
-  pdfReady = load(PDFLIB[0]).then(() => load(PDFLIB[1])).catch(e => { pdfReady = null; throw e; });
+  // Sans réponse du réseau après 20 secondes, on abandonne pour que le bouton redevienne utilisable
+  const timeout = new Promise((_, ko) => setTimeout(() => ko(new Error('timeout')), 20000));
+  pdfReady = Promise.race([load(PDFLIB[0]).then(() => load(PDFLIB[1])), timeout]).catch(e => { pdfReady = null; throw e; });
   return pdfReady;
 }
 // Les espaces fines insécables de fr-CA deviennent des espaces insécables ordinaires (présentes dans la police)
@@ -39,7 +41,7 @@ const svgEsc = s => pt(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', 
 
 function pdfIncomeSVG() {
   const ys = R.years, n = ys.length, W = 515, H = 200, pl = 46, pr = 6, pT = 10, pb = 20;
-  const inc = ys.map(y => y.h.ta.netBefore / y.k), full = S.age >= 75 ? 161320 : 155320;
+  const inc = ys.map(y => y.h.ta.netBefore / y.k), full = fullClaw(S.age);
   const sorted = [...inc].sort((a, b) => b - a), typical = sorted.length > 1 ? sorted[1] : sorted[0];
   const top = Math.max(200000, Math.min(sorted[0], typical * 1.3, Math.max(typical * 1.3, 220000)) * 1.08);
   const sy = v => pT + (H - pT - pb) * (1 - Math.min(v, top) / top), bw = (W - pl - pr) / n;
@@ -52,7 +54,7 @@ function pdfIncomeSVG() {
   ys.forEach((y, i) => {
     const v = inc[i], x = pl + i * bw + bw * .15, w = bw * .7;
     g += `<rect x="${x}" y="${sy(v)}" width="${w}" height="${Math.max(0, sy(0) - sy(v))}" fill="${v > full ? PC.claw : v > P.clawThr ? PC.tax : PC.ferr}"/>`;
-    if (v > top) g += txt(Math.min(x + w + 3, W - pr), pT + 7, `${y.age} : ${money(v)}`, x + w + 70 > W ? 'end' : 'start', PC.ink);
+    if (v > top) g += txt(Math.min(x + w + 3, W - pr), pT + 7, `${y.age}${tr('sep')}${money(v)}`, x + w + 70 > W ? 'end' : 'start', PC.ink);
   });
   thr.forEach(([v, c]) => { if (v < top) g += `<line x1="${pl}" x2="${W - pr}" y1="${sy(v)}" y2="${sy(v)}" stroke="${c}" stroke-width="1.2" stroke-dasharray="4 3"/>`; });
   const lab = Math.ceil(n / 12);
@@ -110,7 +112,7 @@ function buildReport() {
         { text: pt(tr('hl_lead', S.deathAge)), color: PC.muted },
         { text: pt(money(R.estateReal)), fontSize: 28, bold: true, color: PC.accent, margin: [0, 2, 0, 0] },
         { text: pt(tr('hl_unit')), fontSize: 8, color: PC.muted },
-        { text: pt(S.strat === 'min' || Math.abs(d) < 1 ? tr('same_min') : tr('vs_min', (d > 0 ? '+' : '−') + money(Math.abs(d)))), color: S.strat === 'min' || Math.abs(d) < 1 ? PC.ink : d > 0 ? PC.good : PC.warn, bold: true, margin: [0, 6, 0, 10] },
+        { text: pt(S.strat === 'min' || Math.abs(d) < 1 ? tr(S.strat === 'min' ? 'same_min' : 'tie_min') : tr('vs_min', (d > 0 ? '+' : '−') + money(Math.abs(d)))), color: S.strat === 'min' || Math.abs(d) < 1 ? PC.ink : d > 0 ? PC.good : PC.warn, bold: true, margin: [0, 6, 0, 10] },
         { columns: tiles.map(([k, v]) => ({ stack: [{ text: pt(money(v)), bold: true, fontSize: 11 }, { text: pt(tr(k)), fontSize: 7.5, color: PC.muted }] })), columnGap: 10 },
       ], fillColor: PC.soft, margin: [14, 12, 14, 12],
     }]] }, layout: 'noBorders', margin: [0, 0, 0, 14],
@@ -118,17 +120,17 @@ function buildReport() {
 
   let stratTxt = tr('st_' + S.strat);
   if (S.strat === 'lump') stratTxt += ' · ' + tr('ctl_lump', S.lumpYears);
-  if (S.strat === 'target') stratTxt += ' · ' + tr('ctl_target') + ' : ' + money(S.target);
-  if (S.strat === 'fixed') stratTxt += ' · ' + tr('ctl_fixed') + ' : ' + money(S.fixed);
+  if (S.strat === 'target') stratTxt += ' · ' + tr('ctl_target') + tr('sep') + money(S.target) + (S.tnom ? ' ' + tr('nominal_tag') : '');
+  if (S.strat === 'fixed') stratTxt += ' · ' + tr('ctl_fixed') + tr('sep') + money(S.fixed);
   if (S.strat === 'best') stratTxt += ' · ' + (BEST.useMin ? tr('best_min') : tr('best_t', money(BEST.T)));
 
   const maxE = Math.max(1, ...CMP.map(c => c.r.estateReal)), bestV = Math.max(...CMP.map(c => c.r.estateReal));
   const cmpBody = CMP.map(c => {
-    const sel = c.r === R || (c.key === 'min' && S.strat === 'min') || (c.key === 'best' && S.strat === 'best');
+    const sel = c.key === SELKEY, bad = !sel && isBadCmp(c.r.estateReal, bestV);
     const w = Math.max(2, Math.max(0, c.r.estateReal) / maxE * 200);
     return [
       { text: [pt(tr(c.l)), ...(Math.abs(c.r.estateReal - bestV) < 1 ? [{ text: '  ' + pt(tr('best')).toUpperCase(), fontSize: 6.5, color: PC.accent, bold: true }] : [])], bold: sel },
-      { canvas: [{ type: 'rect', x: 0, y: 1, w: 200, h: 10, r: 2, color: PC.sunk }, { type: 'rect', x: 0, y: 1, w, h: 10, r: 2, color: sel ? PC.accent : PC.spend }] },
+      { canvas: [{ type: 'rect', x: 0, y: 1, w: 200, h: 10, r: 2, color: PC.sunk }, { type: 'rect', x: 0, y: 1, w, h: 10, r: 2, color: sel ? PC.accent : bad ? PC.warn : PC.spend }] },
       { text: pt(money(c.r.estateReal)), alignment: 'right', bold: sel },
     ];
   });
@@ -139,22 +141,23 @@ function buildReport() {
     { text: pt(r.v), alignment: 'right', bold: true, color: r.cls === 'hl' ? PC.warn : r.cls === 'ok' ? PC.accent : PC.ink },
   ]);
 
-  const th = L().th;
+  const th = L().th.map((t, i) => S.couple && i >= 6 && i <= 9 ? `${t} ${tr('hh')}` : t);
   const yrows = R.years.map(y => {
     const h = y.h, m = v => pt(money(D(v, y))), sp = h.tb;
-    return [String(y.year), String(y.age), m(y.Fstart), m(y.minW), m(y.w), m(h.ta.netBefore), m(h.oas), m(h.ta.claw), m(h.ta.fed + (sp ? sp.fed : 0)), m(h.ta.qc + (sp ? sp.qc : 0)), m(h.dentalCost), m(y.spend),
+    return [String(y.year), String(y.age), m(y.Fstart), m(y.minW), m(y.w), m(h.ta.netBefore), m(h.oas + h.sOas), m(h.ta.claw + (sp ? sp.claw : 0)), m(h.ta.fed + (sp ? sp.fed : 0)), m(h.ta.qc + (sp ? sp.qc : 0)), m(h.dentalCost), m(y.spend),
       (y.surplus >= 0 ? '+' : '−') + m(Math.abs(y.surplus >= 0 ? y.surplus : y.drawB + y.drawT)), m(y.Bend), m(y.Tend), m(y.Fend)].map((t, i) => ({ text: t, alignment: i < 2 ? 'left' : 'right' }));
   });
-  const full = S.age >= 75 ? 161320 : 155320;
+  const full = fullClaw(S.age);
 
   const content = [
     { text: pt(`${tr('brand').toUpperCase()} · 2026`), style: 'eyebrow' },
     { text: pt(tr('rep_title')), style: 'h1' },
-    { text: pt([S.scen ? `${tr('rep_scen')} : ${S.scen}` : '', tr('rep_gen', gen)].filter(Boolean).join(' · ')), color: PC.muted, margin: [0, 2, 0, 16] },
+    { text: pt([S.scen ? `${tr('rep_scen')}${tr('sep')}${S.scen}` : '', tr('rep_gen', gen)].filter(Boolean).join(' · ')), color: PC.muted, margin: [0, 2, 0, 16] },
     hero,
     h2(tr('rep_strat')), { text: pt(stratTxt), margin: [0, 0, 0, 14] },
     h2(tr('cmp_title')), { text: pt(tr('cmp_sub').split('.')[0] + '.'), style: 'sub' },
-    { table: { widths: ['*', 200, 80], body: cmpBody }, layout: 'rows', margin: [0, 0, 0, 14] },
+    { table: { widths: ['*', 200, 80], body: cmpBody }, layout: 'rows', margin: [0, 0, 0, 4] },
+    legendPDF([[PC.accent, tr('k_sel')], [PC.spend, tr('k_other')], [PC.warn, tr('k_bad')]]), { text: pt(tr('k_tie')), style: 'sub', margin: [0, 4, 0, 14] },
     h2(tr('rep_sit'), { pageBreak: 'before' }), sitTable,
     h2(tr('inc_title'), { margin: [0, 20, 0, 2] }), { text: pt(tr('inc_sub')), style: 'sub' },
     { svg: pdfIncomeSVG(), width: 515 },
@@ -165,13 +168,13 @@ function buildReport() {
     { svg: pdfWealthSVG(), width: 515 },
     legendPDF([[PC.ferr, tr('lg_ferr')], [PC.nr, tr('lg_nr')], [PC.tfsa, tr('lg_tfsa')]]),
     h2(tr('notes_title'), { margin: [0, 22, 0, 6] }),
-    { ul: L().notes.map(n => ({ text: pt(n), margin: [0, 0, 0, 4] })), color: PC.muted },
+    { ul: trl('notes').map(n => ({ text: pt(n), margin: [0, 0, 0, 4] })), color: PC.muted },
     { text: pt(tr('rep_disc')), margin: [0, 14, 0, 4], bold: true },
     { text: pt(tr('rep_priv')), color: PC.muted, fontSize: 8 },
     h2(tr('rep_chain', sel.year, sel.age), { pageBreak: 'before' }), { text: pt(tr('rep_unit', S.real)), style: 'sub' },
     { table: { widths: ['*', 'auto'], body: chain, dontBreakRows: true }, layout: 'rows' },
     h2(tr('rep_tbl'), { pageBreak: 'before', pageOrientation: 'landscape' }), { text: pt(tr('rep_unit', S.real)), style: 'sub' },
-    { table: { headerRows: 1, widths: ['auto', 'auto', ...Array(14).fill('*')], body: [th.map((t, i) => ({ text: pt(t), style: 'th', alignment: i < 2 ? 'left' : 'right' })), ...yrows] }, layout: 'zebra', fontSize: 6.6 },
+    { table: { headerRows: 1, widths: ['auto', 'auto', ...Array(14).fill('*')], body: [th.map((t, i) => ({ text: pt(t), style: 'th', alignment: i < 2 ? 'left' : 'right' })), ...yrows] }, layout: 'zebra', fontSize: 5.9 },
   ];
 
   return {
@@ -183,7 +186,7 @@ function buildReport() {
       h1: { fontSize: 22, bold: true, margin: [0, 4, 0, 0] },
       h2: { fontSize: 13, bold: true, margin: [0, 4, 0, 6], color: PC.ink },
       sub: { fontSize: 8, color: PC.muted, margin: [0, 0, 0, 6] },
-      th: { bold: true, color: PC.muted, fontSize: 6.4 },
+      th: { bold: true, color: PC.muted, fontSize: 5.8 },
     },
     footer: (cur, n) => ({ columns: [{ text: pt(tr('w_disc')), fontSize: 7, color: PC.muted }, { text: pt(tr('rep_page', cur, n)), alignment: 'right', fontSize: 7, color: PC.muted, width: 'auto' }], margin: [48, 18, 48, 0] }),
     content,
