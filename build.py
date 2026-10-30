@@ -26,7 +26,7 @@ HEAD = (
     '<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">\n'
     f'<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,{SVG_ICON}">\n'
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n'
-    '<meta name="theme-color" content="#0f6b5a">\n'
+    '<meta name="theme-color" content="#0e5a5f">\n'
 )
 
 html = (SRC / "sim.src.html").read_text(encoding="utf-8")

@@ -1,25 +1,28 @@
-<title>Simulateur FERR Québec</title>
+<title>Simulateur FERR pour Ivan Léger</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Jost:wght@600;700;800&display=swap">
 <style>
 /* Layout : un questionnaire en cartes, puis un tableau de bord vertical (résumé, stratégies, flux animé, calculs, graphiques, tableau) */
 :root{
-  --bg:#f3f5f2; --surface:#ffffff; --sunk:#e9ede9; --ink:#1b2420; --muted:#5a6762; --line:#d5dcd7;
-  --accent:#0f6b5a; --accent-ink:#ffffff; --accent-soft:#dcece6;
-  --ferr:#0f6b5a; --nr:#3d5a9e; --tfsa:#b7862a; --tax:#b24a22; --claw:#8c2f39; --spend:#7a8a83;
-  --warn:#a4471c; --warn-soft:#f6e4da; --good:#2f7d4f;
-  --display:"Source Serif 4", Georgia, serif; --body:"IBM Plex Sans", system-ui, sans-serif; --mono:"IBM Plex Mono", ui-monospace, monospace;
-  --r:10px;
+  --bg:#f8f3e8; --surface:#ffffff; --sunk:#f1eadb; --ink:#161616; --muted:#4a4640; --line:#cfc6b3; --frame:#161616;
+  --accent:#0e5a5f; --accent-ink:#ffffff; --accent-soft:#d8ebe8;
+  --ferr:#0e5a5f; --nr:#3b5ba5; --tfsa:#c99a2e; --tax:#b03c24; --claw:#7e2a4a; --spend:#8a8478;
+  --warn:#a8381f; --warn-soft:#f7dcd2; --good:#2e7346;
+  --band:#0e5a5f; --band-ink:#ffffff; --band-sub:#e3f0ee; --mustard:#f2c14e; --tomato:#b03c24; --tomato-ink:#ffffff;
+  --display:"Jost", "Century Gothic", sans-serif; --body:"Atkinson Hyperlegible Next", "Atkinson Hyperlegible", Verdana, sans-serif; --mono:"Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --r:2px;
 }
 /* Mode clair par défaut : le sombre ne s'applique que si on le choisit (data-theme="dark") */
 :root[data-theme="dark"]{
-  --bg:#111715; --surface:#19211e; --sunk:#141b18; --ink:#e3eae6; --muted:#98a7a0; --line:#2d3934;
-  --accent:#5cc4a9; --accent-ink:#0d1a16; --accent-soft:#1c332d;
-  --ferr:#5cc4a9; --nr:#8ea8ec; --tfsa:#e2b75a; --tax:#ee8a60; --claw:#e07a86; --spend:#8c9a94;
-  --warn:#f0a07a; --warn-soft:#38251d; --good:#76c895; color-scheme:dark}
+  --bg:#141414; --surface:#1e1e1c; --sunk:#191918; --ink:#f3eee3; --muted:#bcb5a7; --line:#3a3833; --frame:#5a564d;
+  --accent:#5fc0b8; --accent-ink:#0d1a19; --accent-soft:#1d3534;
+  --ferr:#5fc0b8; --nr:#93aef0; --tfsa:#f2c14e; --tax:#f08a6a; --claw:#e68aa6; --spend:#9a9488;
+  --warn:#f29c7e; --warn-soft:#3a231b; --good:#7bcb95;
+  --band:#0b4447; --band-ink:#ffffff; --band-sub:#cfe3e0; --mustard:#f2c14e; --tomato:#e0643f; --tomato-ink:#141414; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body)}
-.wrap{max-width:1080px;margin:0 auto;padding-block:20px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+html{font-size:18px}
+body{background:var(--bg);color:var(--ink);font:1.06rem/1.55 var(--body)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1,h2,h3{font-family:var(--display);line-height:1.2;margin:0;text-wrap:balance}
 h1{font-size:1.9rem;font-weight:650} h2{font-size:1.35rem;font-weight:650} h3{font-size:1.05rem;font-weight:650}
 p{margin:0}
@@ -45,12 +48,6 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 
 /* questionnaire */
 .wiz{display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:start}
-.rail{display:grid;gap:4px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
-.rail button{display:flex;gap:10px;align-items:center;text-align:left;border:0;background:none;padding:8px 10px;border-radius:8px;color:var(--muted);font-size:.9rem}
-.rail button .dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:500 .72rem var(--mono);flex:none;transition:all .3s}
-.rail button.done .dot{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
-.rail button.cur{color:var(--ink);background:var(--surface)}
-.rail button.cur .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px;min-width:0}
 .step{display:grid;gap:22px;animation:stepIn .45s cubic-bezier(.2,.8,.2,1)}
 .step.back{animation-name:stepBack}
@@ -240,27 +237,111 @@ details summary{cursor:pointer;font-weight:600}
 .cv-lg i.dash{background:none;border-top:2px dashed var(--nr);height:0;width:16px;border-radius:0}
 .toast{position:fixed;left:50%;width:max-content;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;text-align:center;font-size:.88rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10;max-width:calc(100vw - 32px)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
-@media (max-width:860px){.wiz{grid-template-columns:1fr}.rail{position:static;grid-auto-flow:column;overflow-x:auto}.rail button span.t{display:none}.headline,.two{grid-template-columns:1fr}}
+/* v3 : style années 60 pour Ivan (bandeau, cadres épais, étapes en tuiles, gros caractères) */
+.top{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:0;align-items:stretch;margin-bottom:22px;border:3px solid var(--frame);background:var(--band);color:var(--band-ink)}
+.mast{display:grid;gap:14px;padding:22px 28px 24px;align-content:start;min-width:0}
+.top .top-actions .btn{background:transparent;border:2px solid var(--band-ink);color:var(--band-ink)}
+.top .top-actions .btn:hover{background:rgb(255 255 255 / .14)}
+.top .seg{border:2px solid var(--band-ink);border-radius:0;background:transparent}
+.top .seg button{color:var(--band-ink);padding:8px 16px;font-size:1rem;font-weight:700;min-height:44px}
+.top .seg button[aria-pressed="true"]{background:var(--band-ink);color:var(--band)}
+.brand{display:grid;gap:2px;color:var(--band-ink)}
+.brand .kick{font:600 1.05rem var(--display);letter-spacing:.3em;text-transform:uppercase;color:var(--mustard)}
+.brand b{font:800 clamp(2.2rem,5.5vw,3.6rem)/1 var(--display);letter-spacing:-.01em}
+.ded{font-size:1.05rem;color:var(--band-sub)}
+.top button:focus-visible{outline:3px solid var(--mustard);outline-offset:3px}
+.mast-art{position:relative;overflow:hidden;background:var(--mustard);border-left:3px solid var(--frame);min-height:200px}
+.mast-art i{position:absolute;display:block}
+.mast-art .a1{left:0;top:0;width:50%;height:46%;background:var(--tomato)}
+.mast-art .a2{left:50%;top:0;width:50%;height:46%;background:#f8f3e8}
+.mast-art .a3{left:59%;top:6%;width:32%;aspect-ratio:1;border-radius:50%;background:var(--band)}
+.mast-art .a4{left:-80px;top:46%;width:240px;height:240px;border-radius:50%;background:#161616}
+.mast-art .a5{left:14px;top:60%;width:72px;height:72px;border-radius:50%;background:var(--mustard)}
+.mast-art .a6{right:0;bottom:0;width:46%;height:42%;background:var(--tomato);border-top-left-radius:100% 100%}
+h1,h2,h3{font-weight:800;letter-spacing:-.005em}
+h2{font-size:1.55rem} h3{font-size:1.18rem;font-weight:700}
+.step h2{font-size:2.1rem}
+.eyebrow{font:700 .85rem var(--body);letter-spacing:.14em;color:var(--accent)}
+.btn{border:2px solid var(--frame);border-radius:var(--r);padding:10px 18px;font-size:1rem;font-weight:600;min-height:48px}
+.btn.primary{border-color:var(--accent)}
+.btn.go{background:var(--mustard);border-color:var(--frame);color:#161616;font-weight:700}
+.btn.go:hover{filter:brightness(1.05)}
+.wiz-nav .btn{min-height:60px;padding:12px 26px;font-size:1.1rem}
+button:focus-visible,input:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wiz{display:block}
+.rail{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0;border:3px solid var(--frame);background:var(--surface);margin-bottom:22px}
+.rail button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px 12px;border:0;border-right:3px solid var(--frame);border-radius:0;background:var(--surface);color:var(--ink);text-align:left;min-width:0;font-size:1rem}
+.rail button:last-child{border-right:0}
+.rail button .dot{width:auto;height:auto;border:0;border-radius:0;display:flex;align-items:center;gap:6px;font:800 2rem/1 var(--display);background:none!important;color:inherit!important}
+.rail button .t{font-weight:600;font-size:.92rem;overflow-wrap:normal;hyphens:none}
+.rail button.done{background:var(--accent-soft);color:var(--ink)}
+.rail button.cur{background:var(--ink);color:var(--bg);box-shadow:inset 0 -7px 0 var(--mustard)}
+.rail button.go7{background:var(--tomato);color:var(--tomato-ink)}
+.rail button.go7.cur{background:var(--tomato);color:var(--tomato-ink)}
+.rail button:not(.cur):hover{box-shadow:inset 0 -5px 0 var(--accent)}
+.card,.panel,.toolbar,.dlg{border:3px solid var(--frame);border-radius:var(--r)}
+.card{padding:34px 38px}
+.welcome .lede{font-size:1.15rem;color:var(--ink)}
+.field label{font-weight:600}
+.field .hint,.choice span{font-size:.92rem}
+.numbox{border:2px solid var(--frame);border-radius:var(--r)}
+.numbox input{font-size:1.1rem;padding:10px 0}
+.choice{border:2px solid var(--line);border-radius:var(--r);padding:16px}
+.choice[aria-pressed="true"]{border-color:var(--accent);border-width:3px;padding:15px}
+.insight{border-radius:var(--r);border-left:0}
+.resume{border:3px solid var(--accent);border-radius:var(--r)}
+.small{font-size:.9rem}
+.chip{border:2px solid var(--frame);font-size:1rem;padding:8px 16px;min-height:44px}
+.gauge .mark span,.ticks button{font-size:.8rem}
+.pill{font-size:.75rem}
+.chart text{font-size:13.5px}
+.flow .node text{font-size:14px}
+.legend{font-size:.92rem}
+table{font-size:.92rem}
+th{font-size:.82rem}
+.chain li .f{font-size:.9rem}
+.notes{font-size:.95rem}
+.saved{font-size:.88rem}
+.linkbtn{font-size:1rem}
+.tabs button{font-size:1rem}
+.cmp-row .lbl{font-size:.98rem}
+.cmp-fill span{font-size:.85rem}
+.tile{border-radius:var(--r)}
+.headline .delta{font-family:var(--body);font-weight:600}
+input[type=range]{accent-color:var(--accent);height:28px}
+.dlg{width:min(860px,calc(100vw - 32px))}
+.rsec{display:grid;gap:10px;border-top:2px solid var(--line);padding-top:16px}
+.rsec h3{font-size:1.25rem}
+.rsrc{font-size:.95rem}
+.rsrc a{color:var(--accent);text-underline-offset:3px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.rgrid span{display:flex;justify-content:space-between;gap:8px;background:var(--sunk);padding:6px 10px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.rgrid b{font-family:var(--body)}
+.rtbl{max-width:460px;font-size:1rem}
+.rtbl th{position:static}
+@media (max-width:860px){.rail{grid-template-columns:repeat(8,minmax(112px,1fr));overflow-x:auto}.headline,.two{grid-template-columns:1fr}.top{grid-template-columns:1fr}.mast-art{display:none}}
 @media (max-width:620px){.scitem,.resume{grid-template-columns:1fr}.scbtns{justify-content:flex-start}.cv-cols{grid-template-columns:1fr}.saved{display:none}}
 @media (max-width:560px){.cv-r{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.cv-r .l{grid-column:1/-1}.cv-r.hd .l{display:none}.cv-r .v,.cv-r.big .v{font-size:.82rem;white-space:normal;overflow-wrap:anywhere}}
-@media (max-width:480px){.card{padding:18px}.dlg-in{padding:16px}.cmp-row{grid-template-columns:1fr}.tiles{grid-template-columns:1fr 1fr}.numbox input{width:96px}}
+@media (max-width:480px){.card{padding:20px 18px}.mast{padding:18px}.dlg-in{padding:16px}.cmp-row{grid-template-columns:1fr}.tiles{grid-template-columns:1fr 1fr}.numbox input{width:96px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
   <header class="top">
-    <button class="brand" id="homeBtn">
-      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="16" width="6" height="12" rx="1.5" fill="var(--ferr)"/><rect x="12" y="9" width="6" height="19" rx="1.5" fill="var(--nr)"/><rect x="22" y="3" width="6" height="25" rx="1.5" fill="var(--tfsa)"/></svg>
-      <b data-t="brand"></b>
-    </button>
-    <div class="top-actions">
-      <button class="btn" id="helpBtn" data-t="help_btn"></button>
-      <button class="btn" id="themeBtn"></button>
-      <div class="seg" role="group" aria-label="Langue / Language">
-        <button id="lang-fr" aria-pressed="true">FR</button><button id="lang-en" aria-pressed="false">EN</button>
+    <div class="mast">
+      <div class="top-actions">
+        <button class="btn" id="helpBtn" data-t="help_btn"></button>
+        <button class="btn" id="themeBtn"></button>
+        <div class="seg" role="group" aria-label="Langue / Language">
+          <button id="lang-fr" aria-pressed="true">FR</button><button id="lang-en" aria-pressed="false">EN</button>
+        </div>
       </div>
+      <button class="brand" id="homeBtn"><span class="kick" data-t="brand_k"></span><b data-t="brand_n"></b></button>
+      <p class="ded" data-t="dedic"></p>
     </div>
+    <div class="mast-art" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i><i class="a5"></i><i class="a6"></i></div>
   </header>
+  <nav class="rail" id="rail"></nav>
   <nav class="toolbar" id="toolbar" hidden>
     <div class="tb-left"><button class="btn" id="editBtn" data-t="edit"></button><span class="saved" data-t="autosaved"></span></div>
     <div class="tb-acts">
@@ -273,7 +354,6 @@ details summary{cursor:pointer;font-weight:600}
   </nav>
 
   <main id="wizard" class="wiz">
-    <nav class="rail" id="rail"></nav>
     <div class="card" id="stepCard"></div>
   </main>
 
