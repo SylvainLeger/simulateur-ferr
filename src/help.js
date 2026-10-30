@@ -154,11 +154,13 @@ function renderHelp() {
     b.onkeydown = e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; e.preventDefault(); const i = tabs.findIndex(t => t[0] === helpTab); go(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length][0]); };
   });
   const w = $('#wipeBtn');
-  if (w) w.onclick = () => arm(w, 'wipe', 'h_wipe', 'h_wipe_ok', () => {
-    try { localStorage.removeItem('ferrsim'); localStorage.removeItem('ferrsim_scen'); } catch (e) { }
-    leaveSim(); S = { ...DEFAULTS, ...keepPrefs(), started: false };
-    dlg.close(); save(); showView(); dir = -1; renderWizard(); toast(tr('h_wiped'));
-  });
+  if (w) w.onclick = () => arm(w, 'wipe', 'h_wipe', 'h_wipe_ok', () => { dlg.close(); wipeAll(); });
+}
+// Efface les réponses et les scénarios de ce navigateur, puis revient à l'accueil (langue et mode d'affichage gardés)
+function wipeAll() {
+  try { localStorage.removeItem('ferrsim'); localStorage.removeItem('ferrsim_scen'); } catch (e) { }
+  leaveSim(); S = { ...DEFAULTS, ...keepPrefs(), started: false };
+  S.view = 'wizard'; S.step = 0; save(); showView(); dir = -1; renderWizard(); toast(tr('h_wiped'));
 }
 $('#helpBtn').onclick = () => openHelp();
 $('#helpDlg').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });

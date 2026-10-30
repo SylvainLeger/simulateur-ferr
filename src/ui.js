@@ -309,7 +309,7 @@ function renderWizard() {
     const mid = !S.started && S.wstep > 0;
     const nav = S.started || mid
       ? `<div class="resume"><div><b>${tr(mid ? 'wq_title' : 'rs_title')}</b><span class="small muted">${esc(resumeMeta())}</span></div><button class="btn primary" id="resumeBtn">${mid ? tr('wq_go', S.wstep) : tr('rs_go')}</button></div>
-        <div class="wiz-nav"><button class="btn" id="newBtn">${tr('new_sim')}</button>${mid ? `<button class="btn go" id="skipBtn">${tr('skip')}</button>` : ''}${n ? `<button class="linkbtn" id="wScen">${tr('rs_n', n)}</button>` : ''}</div>`
+        <div class="wiz-nav"><button class="btn" id="newBtn">${tr('new_sim')}</button>${mid ? `<button class="btn go" id="skipBtn">${tr('skip')}</button>` : ''}${n ? `<button class="linkbtn" id="wScen">${tr('rs_n', n)}</button>` : ''}<button class="btn" id="wipeHome">${tr('h_wipe')}</button></div>`
       : `<div class="wiz-nav"><button class="btn go" id="exBtn">${tr('skip')}</button><button class="btn primary" id="nextBtn">${tr('start')}</button></div>`;
     card.innerHTML = `<div class="step welcome ${dir < 0 ? 'back' : ''}"><div class="eyebrow">2026 · ${tr('place')}</div><h2 tabindex="-1">${tr('w_title')}</h2><p class="lede">${tr('w_lede')}</p>
       <ul><li>${tr('w_l1')}</li><li>${tr('w_l2')}</li><li>${tr('w_l3')} <button class="linkbtn" id="wPriv">${tr('w_priv')}</button></li></ul><p class="small muted">${tr('w_disc')}</p>
@@ -321,6 +321,7 @@ function renderWizard() {
       nb.onclick = () => arm(nb, 'new', 'new_sim', 'new_ok', () => { leaveSim(); S = { ...DEFAULTS, ...keepPrefs(), started: false }; save(); goWizard(1); toast(tr('new_done')); });
       if (n) $('#wScen').onclick = openScen;
       if (mid) $('#skipBtn').onclick = goSim;
+      const wh = $('#wipeHome'); wh.onclick = () => arm(wh, 'wipeHome', 'h_wipe', 'h_wipe_ok', wipeAll);
       afterRender(card);
       return;
     }
