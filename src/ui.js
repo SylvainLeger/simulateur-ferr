@@ -84,7 +84,7 @@ const I18N = {
       'Le compte non enregistré appartient à la personne. Si les dépenses dépassent les revenus, on puise dans ce compte, puis dans le CELI, puis on retire plus du FERR.',
       'Outil éducatif. Pour une décision réelle, validez avec un planificateur financier ou un fiscaliste.'
     ],
-    research: 'Recherche détaillée sur les règles',
+    research: 'Les règles en détail, avec leurs sources',
   },
   en: {
     brand: 'RRIF Simulator for Ivan Léger', brand_k: 'RRIF Simulator', brand_n: 'for Ivan Léger', dedic: 'From Sylvain, with love · 2026 edition', s_sim: 'Simulator', skip: 'Go straight to the simulator', edit: 'Edit my answers', th_light: 'Light mode', th_dark: 'Dark mode',
@@ -169,7 +169,7 @@ const I18N = {
       'The non-registered account belongs to the person. If spending exceeds income, money comes from that account, then the TFSA, then extra RRIF withdrawals.',
       'Educational tool. For a real decision, check with a financial planner or tax specialist.'
     ],
-    research: 'Detailed research on the rules (in French)',
+    research: 'The rules in detail, with their sources',
   }
 };
 
@@ -459,10 +459,11 @@ function buildSim() {
     <div class="seg" role="group"><button id="realBtn" aria-pressed="${S.real}">${tr('tbl_real')}</button><button id="nomBtn" aria-pressed="${!S.real}">${tr('tbl_nom')}</button></div></div>
     <div class="tblwrap"><table id="tbl"></table></div></section>
   <section class="panel notes"><h3 style="color:var(--ink)">${tr('notes_title')}</h3><ul>${trl('notes').map(n => `<li>${n}</li>`).join('')}</ul>
-    <p><a href="https://claude.ai/artifact/KXpM8v45x8zd3oTMMLeYML" target="_blank" rel="noopener" style="color:var(--accent)">${tr('research')}</a></p></section>`;
+    <p><button class="linkbtn" id="rulesBtn">${tr('research')}</button></p></section>`;
   el.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { S.strat = b.dataset.st; save(); animNext = true; el.querySelectorAll('[data-st]').forEach(o => o.setAttribute('aria-pressed', String(o === b))); refresh(); });
   bindFields($('#adjust'), () => { refreshSoon(); });
   $('#yearR').oninput = e => { S.sel = +e.target.value; save(); renderYear(); };
+  $('#rulesBtn').onclick = () => openHelp('rules');
   $('#playBtn').onclick = () => playing ? stopPlay() : startPlay();
   $('#realBtn').onclick = () => { S.real = true; save(); $('#realBtn').setAttribute('aria-pressed', 'true'); $('#nomBtn').setAttribute('aria-pressed', 'false'); renderTable(); renderChain(); };
   $('#nomBtn').onclick = () => { S.real = false; save(); $('#realBtn').setAttribute('aria-pressed', 'false'); $('#nomBtn').setAttribute('aria-pressed', 'true'); renderTable(); renderChain(); };

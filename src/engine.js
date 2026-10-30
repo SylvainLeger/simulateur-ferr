@@ -8,7 +8,8 @@ const P = {
   oas65: 762.50 * 12, oas75: 838.75 * 12, clawThr: 95323, clawRate: .15,
   gisSingle: 1138.90 * 12, gisCutSingle: 23112, gisCouple: 685.56 * 12, gisCutCouple: 30528, gisCutNoOas: 55392,
   saMax: 2000, saThrS: 28405, saThrC: 46200, saRate: .0547,
-  ramqMax: 760, ramqExS: 19790, ramqExC: 32140, ramqRate: .10,
+  ramqMax: 778, // prime maximale : 766 $ jusqu'au 30 juin 2026, 789 $ ensuite ; moyenne pour l'année 2026
+  ramqExS: 19790, ramqExC: 32140, ramqRate: .10,
   divGross: .38, fedDTC: .150198, qcDTC: .117,
   tfsaLimit: 7000,
   dental: [[70000, 0], [80000, .4], [90000, .6]],
