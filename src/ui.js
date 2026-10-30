@@ -1,8 +1,8 @@
 // Interface : questionnaire, simulation animée, bilingue
 const I18N = {
   fr: {
-    brand: 'Simulateur FERR Québec', edit: 'Modifier mes réponses', th_light: 'Mode clair', th_dark: 'Mode sombre',
-    back: 'Retour', next: 'Suivant', launch: 'Lancer la simulation', start: 'Commencer', example: 'Voir un exemple tout de suite',
+    brand: 'Simulateur FERR pour Ivan Léger', brand_k: 'Simulateur FERR', brand_n: 'pour Ivan Léger', dedic: 'De Sylvain, avec affection · Édition 2026', s_sim: 'Simulateur', skip: 'Aller directement au simulateur', edit: 'Modifier mes réponses', th_light: 'Mode clair', th_dark: 'Mode sombre',
+    back: 'Retour', next: 'Suivant', launch: 'Lancer la simulation', start: 'Commencer les questions',
     yes: 'Oui', no: 'Non', years: 'ans',
     s_welcome: 'Bienvenue', s_age: 'Âge', s_account: 'Compte', s_income: 'Revenus', s_household: 'Ménage', s_invest: 'Placements', s_budget: 'Budget',
     w_title: 'Retirer le minimum de son FERR, ou plus ?',
@@ -87,8 +87,8 @@ const I18N = {
     research: 'Recherche détaillée sur les règles',
   },
   en: {
-    brand: 'Quebec RRIF Simulator', edit: 'Edit my answers', th_light: 'Light mode', th_dark: 'Dark mode',
-    back: 'Back', next: 'Next', launch: 'Run the simulation', start: 'Start', example: 'See an example right away',
+    brand: 'RRIF Simulator for Ivan Léger', brand_k: 'RRIF Simulator', brand_n: 'for Ivan Léger', dedic: 'From Sylvain, with love · 2026 edition', s_sim: 'Simulator', skip: 'Go straight to the simulator', edit: 'Edit my answers', th_light: 'Light mode', th_dark: 'Dark mode',
+    back: 'Back', next: 'Next', launch: 'Run the simulation', start: 'Start the questions',
     yes: 'Yes', no: 'No', years: 'yrs',
     s_welcome: 'Welcome', s_age: 'Age', s_account: 'Account', s_income: 'Income', s_household: 'Household', s_invest: 'Investments', s_budget: 'Budget',
     w_title: 'Withdraw the RRIF minimum, or more?',
@@ -249,9 +249,17 @@ const STEPS = [
 ];
 let dir = 1;
 function renderRail() {
+  const inSim = S.view === 'sim';
   $('#rail').setAttribute('aria-label', tr('steps'));
-  $('#rail').innerHTML = STEPS.map((s, i) => `<button class="${i < S.step ? 'done' : ''} ${i === S.step ? 'cur' : ''}" data-go="${i}" aria-label="${esc(tr('step_n', i, tr(s.t)))}" aria-current="${i === S.step ? 'step' : 'false'}"><span class="dot" aria-hidden="true">${i}</span><span class="t" aria-hidden="true">${tr(s.t)}</span></button>`).join('');
-  $('#rail').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { const g = +b.dataset.go; dir = g >= S.step ? 1 : -1; S.step = g; save(); refocus = 'h2'; renderWizard(); });
+  // Étapes 0 à 6 du questionnaire, puis l'étape 7 qui mène directement au simulateur
+  $('#rail').innerHTML = STEPS.map((s, i) => { const cur = !inSim && i === S.step; return `<button class="${inSim || i < S.step ? 'done' : ''} ${cur ? 'cur' : ''}" data-go="${i}" aria-label="${esc(tr('step_n', i, tr(s.t)))}" aria-current="${cur ? 'step' : 'false'}"><span class="dot" aria-hidden="true">${i}</span><span class="t" aria-hidden="true">${tr(s.t)}</span></button>`; }).join('')
+    + `<button class="go7 ${inSim ? 'cur' : ''}" id="railSim" aria-label="${esc(tr('step_n', STEPS.length, tr('s_sim')))}" aria-current="${inSim ? 'step' : 'false'}"><span class="dot" aria-hidden="true">${STEPS.length}<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg></span><span class="t" aria-hidden="true">${tr('s_sim')}</span></button>`;
+  $('#rail').querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
+    const g = +b.dataset.go;
+    if (S.view !== 'wizard') { goWizard(g); return; }
+    dir = g >= S.step ? 1 : -1; S.step = g; save(); refocus = 'h2'; renderWizard();
+  });
+  $('#railSim').onclick = () => { if (S.view !== 'sim') goSim(); };
 }
 function minIncomeEstimate() {
   const oas = S.oas ? oasFor(S.age, 1) : 0;
@@ -301,8 +309,8 @@ function renderWizard() {
     const mid = !S.started && S.wstep > 0;
     const nav = S.started || mid
       ? `<div class="resume"><div><b>${tr(mid ? 'wq_title' : 'rs_title')}</b><span class="small muted">${esc(resumeMeta())}</span></div><button class="btn primary" id="resumeBtn">${mid ? tr('wq_go', S.wstep) : tr('rs_go')}</button></div>
-        <div class="wiz-nav"><button class="btn" id="newBtn">${tr('new_sim')}</button>${n ? `<button class="linkbtn" id="wScen">${tr('rs_n', n)}</button>` : ''}</div>`
-      : `<div class="wiz-nav"><button class="btn" id="exBtn">${tr('example')}</button><button class="btn primary" id="nextBtn">${tr('start')}</button></div>`;
+        <div class="wiz-nav"><button class="btn" id="newBtn">${tr('new_sim')}</button>${mid ? `<button class="btn go" id="skipBtn">${tr('skip')}</button>` : ''}${n ? `<button class="linkbtn" id="wScen">${tr('rs_n', n)}</button>` : ''}</div>`
+      : `<div class="wiz-nav"><button class="btn go" id="exBtn">${tr('skip')}</button><button class="btn primary" id="nextBtn">${tr('start')}</button></div>`;
     card.innerHTML = `<div class="step welcome ${dir < 0 ? 'back' : ''}"><div class="eyebrow">2026 · ${tr('place')}</div><h2 tabindex="-1">${tr('w_title')}</h2><p class="lede">${tr('w_lede')}</p>
       <ul><li>${tr('w_l1')}</li><li>${tr('w_l2')}</li><li>${tr('w_l3')} <button class="linkbtn" id="wPriv">${tr('w_priv')}</button></li></ul><p class="small muted">${tr('w_disc')}</p>
       ${nav}</div>`;
@@ -312,6 +320,7 @@ function renderWizard() {
       const nb = $('#newBtn');
       nb.onclick = () => arm(nb, 'new', 'new_sim', 'new_ok', () => { leaveSim(); S = { ...DEFAULTS, ...keepPrefs(), started: false }; save(); goWizard(1); toast(tr('new_done')); });
       if (n) $('#wScen').onclick = openScen;
+      if (mid) $('#skipBtn').onclick = goSim;
       afterRender(card);
       return;
     }
@@ -388,6 +397,7 @@ function showView() {
   const v = S.view;
   $('#wizard').hidden = v !== 'wizard'; $('#sim').hidden = v !== 'sim'; $('#cmpv').hidden = v !== 'cmp';
   $('#toolbar').hidden = v === 'wizard';
+  $('#rail').hidden = v === 'cmp'; if (v !== 'cmp') renderRail();
   $('#editBtn').hidden = v !== 'sim'; $('#saveBtn').hidden = v !== 'sim'; $('#pdfBtn').hidden = v === 'cmp';
   $('#cmpBtn').textContent = v === 'cmp' ? tr('cmp_back') : tr('cmp_btn');
   $('#shareBtn').textContent = v === 'cmp' ? tr('share_cmp') : tr('share_btn');
