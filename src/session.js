@@ -181,7 +181,6 @@ function openLinkBox(url) { linkUrl = url; openDlg('link'); }
 function renderDlg() {
   const dlg = $('#sessDlg'); if (!dlg.open) return;
   if (dlgMode === 'save') renderSave(dlg); else if (dlgMode === 'link') renderLink(dlg); else renderScen(dlg);
-  $('#dlgClose').onclick = () => dlg.close();
 }
 function suggestName() {
   // Le nom du scénario ouvert, tant qu'il n'a pas été modifié ; sinon un nom qui décrit la situation
@@ -253,7 +252,8 @@ function onScenChange() { if (S.view === 'cmp') buildCmp(); else if (S.view === 
 $('#saveBtn').onclick = openSave;
 $('#scenBtn').onclick = openScen;
 $('#shareBtn').onclick = () => copyLink(S.view === 'cmp' ? cmpLink() : shareLink());
-$('#sessDlg').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+// Fermer : écouteur unique sur la fenêtre, car son contenu est redessiné (effacer, renommer)
+$('#sessDlg').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('#dlgClose')) e.currentTarget.close(); });
 window.addEventListener('hashchange', () => { const h = readHash(); if (h) { applyLang(); rebuildView(); toast(linkToast(h)); } });
 // Effacement fait dans un autre onglet : ne pas réécrire les données à la prochaine action ici
 window.addEventListener('storage', e => {
